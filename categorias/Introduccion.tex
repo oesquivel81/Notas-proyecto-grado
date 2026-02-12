@@ -1,0 +1,195 @@
+\documentclass[11pt]{article}
+
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{tikz-cd}
+\geometry{margin=1in}
+
+\title{Funtores y su Aplicación Conceptual en Inteligencia Artificial}
+\author{Equipo de Ingeniería}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+
+En este documento presentamos una explicación intuitiva y formal del concepto de \textbf{funtor} desde teoría de categorías, junto con una interpretación aplicada al contexto de modelos de Inteligencia Artificial (IA), especialmente embeddings y redes neuronales.
+
+El objetivo es mostrar que muchas arquitecturas modernas pueden entenderse como estructuras que preservan composición, lo cual es precisamente la esencia de un funtor.
+
+\section{Recordatorio: ¿Qué es una categoría?}
+
+Una categoría $\mathcal{C}$ está compuesta por:
+
+\begin{itemize}
+    \item Objetos
+    \item Morfismos (flechas) entre objetos
+\end{itemize}
+
+Cumpliendo:
+
+\begin{itemize}
+    \item Existencia de identidad: $\text{id}_X : X \to X$
+    \item Composición asociativa: si $f: X \to Y$ y $g: Y \to Z$, entonces existe $g \circ f: X \to Z$
+\end{itemize}
+
+\section{Definición Formal de Funtor}
+
+Un \textbf{funtor covariante} 
+
+\[
+F : \mathcal{C} \to \mathcal{D}
+\]
+
+asigna:
+
+\begin{itemize}
+    \item A cada objeto $X \in \mathcal{C}$ un objeto $F(X) \in \mathcal{D}$
+    \item A cada morfismo $f: X \to Y$ un morfismo $F(f): F(X) \to F(Y)$
+\end{itemize}
+
+Preservando:
+
+\[
+F(\text{id}_X) = \text{id}_{F(X)}
+\]
+
+\[
+F(g \circ f) = F(g) \circ F(f)
+\]
+
+Es decir, un funtor preserva identidad y composición.
+
+\section{Modelo Conceptual Aplicado a IA}
+
+Consideremos dos categorías:
+
+\subsection{Categoría de Datos $\mathcal{Data}$}
+
+\begin{itemize}
+    \item Objetos: conjuntos de datos (texto, imágenes, audio)
+    \item Morfismos: transformaciones válidas (tokenización, normalización, data augmentation)
+\end{itemize}
+
+\subsection{Categoría Vectorial $\mathcal{Vect}$}
+
+\begin{itemize}
+    \item Objetos: espacios vectoriales $\mathbb{R}^n$
+    \item Morfismos: transformaciones lineales (capas neuronales)
+\end{itemize}
+
+\section{El Embedding como Funtor}
+
+Definimos:
+
+\[
+F : \mathcal{Data} \to \mathcal{Vect}
+\]
+
+Tal que:
+
+\begin{itemize}
+    \item A cada dataset $D$ le asigna un embedding $F(D) \subseteq \mathbb{R}^n$
+    \item A cada transformación $T: D_1 \to D_2$ le asigna una transformación lineal $F(T)$
+\end{itemize}
+
+\subsection{Preservación de Composición}
+
+Supongamos:
+
+\[
+T_1 : D \to D'
+\]
+\[
+T_2 : D' \to D''
+\]
+
+Entonces:
+
+\[
+F(T_2 \circ T_1) = F(T_2) \circ F(T_1)
+\]
+
+Esto refleja exactamente cómo funcionan las redes neuronales:
+
+\[
+\text{Input} 
+\longrightarrow 
+\text{Embedding}
+\longrightarrow 
+W_1
+\longrightarrow 
+\sigma
+\longrightarrow 
+W_2
+\]
+
+Cada capa es composición de transformaciones.
+
+\section{Interpretación en Redes Neuronales}
+
+Una red neuronal puede entenderse como la composición:
+
+\[
+f(x) = W_k \sigma( W_{k-1} \sigma( \dots W_1 x ))
+\]
+
+La arquitectura respeta estructura composicional:
+
+\[
+F(g \circ f) = F(g) \circ F(f)
+\]
+
+Es decir, el modelo completo es composición de morfismos en $\mathcal{Vect}$.
+
+\section{Caso Especial: Graph Neural Networks}
+
+Podemos definir:
+
+\[
+F : \mathbf{Graph} \to \mathbf{Vect}
+\]
+
+Donde:
+
+\begin{itemize}
+    \item Objetos: grafos
+    \item Morfismos: homomorfismos de grafos
+    \item Imagen: embeddings del grafo
+\end{itemize}
+
+Una GNN puede verse como un funtor que transforma estructura relacional en representación vectorial preservando composición estructural.
+
+\section{Conclusión}
+
+Un funtor es una estructura que:
+
+\begin{itemize}
+    \item Traduce objetos entre categorías
+    \item Traduce transformaciones
+    \item Preserva identidad
+    \item Preserva composición
+\end{itemize}
+
+Muchos modelos modernos de IA pueden interpretarse como funtores:
+
+\begin{itemize}
+    \item Embeddings
+    \item Redes neuronales profundas
+    \item GNNs
+    \item Modelos kernelizados
+\end{itemize}
+
+Esta perspectiva permite:
+
+\begin{itemize}
+    \item Comprender mejor la composición de modelos
+    \item Diseñar arquitecturas más estructurales
+    \item Conectar IA con teoría matemática avanzada
+\end{itemize}
+
+\end{document}
