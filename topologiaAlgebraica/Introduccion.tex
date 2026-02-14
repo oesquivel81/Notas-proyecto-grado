@@ -1,0 +1,212 @@
+\documentclass[11pt]{article}
+
+% ---------- Paquetes ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% ---------- Macros útiles ----------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\betti}{\beta}
+
+\title{Nota de introducción: Caminos, Homotopía y su conexión con TDA}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\section{Objetivo y notación}
+El objetivo de esta nota es introducir:
+\begin{itemize}[leftmargin=*]
+  \item caminos en espacios topológicos,
+  \item homotopía entre funciones (y entre caminos),
+  \item relación de equivalencia y clases,
+  \item una conexión básica con Topological Data Analysis (TDA) mediante complejos de Vietoris--Rips.
+\end{itemize}
+
+\medskip
+\noindent Notación:
+\begin{itemize}[leftmargin=*]
+  \item $[0,1]$ es el intervalo unidad.
+  \item $S^1=\{(x,y)\in\R^2: x^2+y^2=1\}$ es el círculo unitario.
+  \item $\mathcal{C}(X,Y)$ denota el conjunto de funciones continuas $X\to Y$.
+\end{itemize}
+
+\section{Relación de equivalencia}
+Sea $A$ un conjunto. Una relación $\sim$ sobre $A$ es una \textbf{relación de equivalencia} si para todo $a,b,c\in A$:
+\begin{enumerate}[label=(\alph*), leftmargin=*]
+  \item \textbf{Reflexiva:} $a\sim a$.
+  \item \textbf{Simétrica:} si $a\sim b$, entonces $b\sim a$.
+  \item \textbf{Transitiva:} si $a\sim b$ y $b\sim c$, entonces $a\sim c$.
+\end{enumerate}
+
+\subsection{Clases de equivalencia y cociente}
+La \textbf{clase de equivalencia} de $a\in A$ es
+\[
+[a]=\{x\in A:\; x\sim a\}.
+\]
+El conjunto cociente es
+\[
+A/\!\sim \;=\;\{[a]: a\in A\}.
+\]
+Las clases de equivalencia forman una partición de $A$ (no se traslapan y cubren todo $A$).
+
+\section{Caminos (paths)}
+Sea $X$ un espacio topológico.
+
+\subsection{Definición}
+Un \textbf{camino} en $X$ es una función continua
+\[
+\gamma:[0,1]\to X.
+\]
+Decimos que $\gamma$ va de $a$ a $b$ si
+\[
+\gamma(0)=a,\qquad \gamma(1)=b.
+\]
+
+\subsection{Ejemplo en $\R^2$}
+De $a=(0,0)$ a $b=(1,1)$:
+\[
+\gamma(t)=(t,t).
+\]
+Un \textbf{lazo} es un camino cerrado: $\gamma(0)=\gamma(1)$.
+
+\section{Homotopía entre funciones}
+Sean $X,Y$ espacios topológicos y $f,g:X\to Y$ funciones continuas.
+
+\subsection{Definición}
+Decimos que $f$ es \textbf{homotópica} a $g$ (se escribe $f\simeq g$) si existe una función continua
+\[
+H:X\times[0,1]\to Y
+\]
+tal que
+\[
+H(x,0)=f(x),\qquad H(x,1)=g(x)\quad \text{para todo }x\in X.
+\]
+Intuición: $H$ es una deformación continua de $f$ a $g$.
+
+\section{La homotopía es una relación de equivalencia}
+Consideremos la relación $\simeq$ sobre $\mathcal{C}(X,Y)$ dada por homotopía.
+
+\subsection{Reflexividad}
+Para $f\in\mathcal{C}(X,Y)$ definimos
+\[
+H(x,t)=f(x).
+\]
+Entonces $H(x,0)=f(x)$ y $H(x,1)=f(x)$, y $H$ es continua. Por tanto, $f\simeq f$.
+
+\subsection{Simetría}
+Si $H$ es una homotopía de $f$ a $g$, definimos
+\[
+K(x,t)=H(x,1-t).
+\]
+Entonces
+\[
+K(x,0)=H(x,1)=g(x),\qquad K(x,1)=H(x,0)=f(x),
+\]
+y $K$ es continua. Luego, $g\simeq f$.
+
+\subsection{Transitividad}
+Si $H$ es una homotopía de $f$ a $g$ y $G$ es una homotopía de $g$ a $h$, definimos $F:X\times[0,1]\to Y$ por pegado:
+\[
+F(x,t)=
+\begin{cases}
+H(x,2t), & 0\le t\le \tfrac12,\\[4pt]
+G(x,2t-1), & \tfrac12\le t\le 1.
+\end{cases}
+\]
+Se cumple:
+\[
+F(x,0)=H(x,0)=f(x),\qquad F(x,1)=G(x,1)=h(x),
+\]
+y en $t=\tfrac12$ coinciden porque
+\[
+H(x,1)=g(x)=G(x,0).
+\]
+Por el lema de pegado, $F$ es continua, así que $f\simeq h$.
+
+\medskip
+\noindent Conclusión: $\simeq$ es una relación de equivalencia sobre $\mathcal{C}(X,Y)$.
+
+\section{Homotopía de caminos con extremos fijos (mención útil)}
+Sean $\gamma_0,\gamma_1:[0,1]\to X$ caminos con los mismos extremos:
+\[
+\gamma_0(0)=\gamma_1(0),\qquad \gamma_0(1)=\gamma_1(1).
+\]
+Decimos que son \textbf{homotópicos con extremos fijos} si existe una aplicación continua
+\[
+H:[0,1]\times[0,1]\to X
+\]
+tal que
+\[
+H(s,0)=\gamma_0(s),\qquad H(s,1)=\gamma_1(s),
+\]
+y además mantiene fijos los extremos:
+\[
+H(0,t)=\gamma_0(0),\qquad H(1,t)=\gamma_0(1)\quad \text{para todo }t\in[0,1].
+\]
+Esta relación también es una relación de equivalencia y es base para definir el grupo fundamental $\pi_1(X)$.
+
+\section{Conexión con TDA: ejemplo simple con Vietoris--Rips}
+La idea en TDA es aproximar la ``forma'' de datos (puntos) construyendo complejos simpliciales a diferentes escalas $\varepsilon$
+y calculando invariantes (por ejemplo, homología y números de Betti), que son invariantes por homotopía.
+
+\subsection{Círculo unitario y puntos equiespaciados}
+Tomamos $6$ puntos en el círculo unitario $S^1$:
+\[
+\theta_j=\frac{2\pi j}{6},\qquad
+p_j=(\cos\theta_j,\sin\theta_j),\qquad j=0,1,2,3,4,5.
+\]
+\textbf{Interpretación de ``pasos'':} desde $p_j$, moverse $k$ pasos significa ir a $p_{j+k}$ (índices módulo $6$).
+
+\subsection{Distancias por pasos}
+El ángulo entre $p_j$ y $p_{j+k}$ es
+\[
+\Delta\theta=\theta_{j+k}-\theta_j=\frac{2\pi k}{6}.
+\]
+En un círculo de radio $1$, la cuerda correspondiente tiene longitud
+\[
+d(k)=2\sin\!\left(\frac{\Delta\theta}{2}\right)
+=2\sin\!\left(\frac{k\pi}{6}\right).
+\]
+Por tanto:
+\[
+d(1)=1,\qquad d(2)=\sqrt3,\qquad d(3)=2.
+\]
+
+\subsection{Complejo de Vietoris--Rips $VR_\varepsilon$}
+Dado un conjunto finito de puntos, el complejo $VR_\varepsilon$ se define así:
+\begin{itemize}[leftmargin=*]
+  \item Se agrega una arista $(p_i,p_j)$ si $\norm{p_i-p_j}\le \varepsilon$.
+  \item Se agrega un triángulo $(p_i,p_j,p_k)$ si las tres distancias por pares son $\le\varepsilon$.
+  \item En general, se agrega un símplice cuando todas las distancias por pares cumplen $\le\varepsilon$.
+\end{itemize}
+
+\subsection{Dos escalas y números de Betti}
+\paragraph{Caso A: $1<\varepsilon<\sqrt3$ (ej. $\varepsilon=1.2$).}
+Como $d(1)=1\le\varepsilon$, se conectan vecinos. Como $d(2)=\sqrt3>\varepsilon$, no se conectan puntos a dos pasos.
+El complejo es un ciclo (hexágono), con un agujero:
+\[
+\betti_0=1,\qquad \betti_1=1.
+\]
+Intuición: $VR_\varepsilon$ ``se parece'' a un círculo ($VR_\varepsilon\simeq S^1$).
+
+\paragraph{Caso B: $\sqrt3<\varepsilon<2$ (ej. $\varepsilon=1.75$).}
+Ahora también se conectan puntos a dos pasos porque $d(2)=\sqrt3\le\varepsilon$.
+Entonces para cada triple consecutivo $(p_j,p_{j+1},p_{j+2})$ aparecen las tres aristas y, por tanto, un triángulo que rellena el ciclo.
+El agujero desaparece:
+\[
+\betti_0=1,\qquad \betti_1=0.
+\]
+
+\subsection{Comentario clave}
+En TDA se estudia cómo cambian estos rasgos al variar $\varepsilon$ (persistencia). Como la homología es invariante por homotopía,
+rasgos que persisten suelen interpretarse como estructura real y no ruido.
+
+\end{document}

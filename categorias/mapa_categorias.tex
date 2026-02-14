@@ -1,0 +1,331 @@
+\documentclass[12pt]{article}
+
+% =========================
+% Paquetes
+% =========================
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[spanish]{babel}
+\shorthandoff{"}
+
+\usepackage{tikz-cd}
+\geometry{margin=2.5cm}
+
+% =========================
+% Entornos
+% =========================
+\newtheorem{definition}{Definición}
+\newtheorem{remark}{Observación}
+
+% =========================
+% Documento
+% =========================
+\title{Categorías y Funtores: Mapa Jerárquico y Diagramas con \texttt{tikz-cd}\\
+\large (con ejemplos para LLMs, Multi-Head y TDA)}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+% ======================================================
+\section{Introducción}
+Este documento reúne un mapa jerárquico de tipos de categorías y, sobre todo,
+un conjunto de diagramas conmutativos listos en \texttt{tikz-cd} para modelar
+pipelines tipo LLM, multi-head attention y TDA.
+
+% ======================================================
+\section{Fundamentos: categoría, conmutatividad y funtores}
+
+\subsection{Definición de categoría}
+\begin{definition}
+Una \textbf{categoría} $\mathcal{C}$ consiste en:
+\begin{itemize}
+    \item una clase de objetos $\mathrm{Ob}(\mathcal{C})$;
+    \item para cada par $A,B$, un conjunto de morfismos $\mathrm{Hom}_{\mathcal{C}}(A,B)$;
+    \item composición $\circ : \mathrm{Hom}(B,C)\times \mathrm{Hom}(A,B)\to \mathrm{Hom}(A,C)$;
+    \item identidades $\mathrm{id}_A\in \mathrm{Hom}(A,A)$,
+\end{itemize}
+sujeto a asociatividad e identidad.
+\end{definition}
+
+\subsection{Diagrama conmutativo (el cuadrado básico)}
+Un cuadrado
+{\shorthandoff{"}
+\[
+\begin{tikzcd}
+A \arrow[r,"f"] \arrow[d,"g"'] & B \arrow[d,"h"] \\
+C \arrow[r,"k"']              & D
+\end{tikzcd}
+\]
+}
+
+\emph{conmuta} si
+\[
+h\circ f = k\circ g.
+\]
+
+\subsection{Definición de funtor (covariante)}
+\begin{definition}
+Un \textbf{funtor} $F:\mathcal{C}\to \mathcal{D}$ asigna:
+\begin{itemize}
+\item a cada objeto $A\in \mathcal{C}$ un objeto $F(A)\in \mathcal{D}$;
+\item a cada morfismo $f:A\to B$ un morfismo $F(f):F(A)\to F(B)$;
+\end{itemize}
+de modo que $F(\mathrm{id}_A)=\mathrm{id}_{F(A)}$ y $F(g\circ f)=F(g)\circ F(f)$.
+\end{definition}
+
+\subsection{Funtor contravariante}
+Un funtor contravariante es $F:\mathcal{C}^{op}\to \mathcal{D}$, es decir invierte flechas.
+
+% ======================================================
+\section{Mapa jerárquico de tipos de categorías}
+\subsection{Mapa visual (alto nivel)}
+{\shorthandoff{"}
+\[
+\begin{tikzcd}[row sep=large, column sep=huge]
+\text{Categoría básica}
+  \arrow[d, dashed, "\text{añadir estructura}"] \\
+\text{Familias principales}
+\end{tikzcd}
+\]
+
+\subsection{Árbol (familias principales)}
+\[
+\begin{tikzcd}[row sep=large, column sep=large]
+& \textbf{Categorías (base)} \arrow[dl] \arrow[d] \arrow[dr] & \\
+\textbf{Orden} \arrow[d] & \textbf{Algebra} \arrow[d] & \textbf{Geometría} \arrow[d] \\
+\text{Preorden/Poset} & \text{Aditiva/Abeliana} & \text{Top/Métrica/Man} \\
+& \textbf{Tensor} \arrow[d] & \textbf{Homológica} \arrow[d] \\
+& \text{Monoidal/Cerrada} & \text{Triangulada/Derivada} \\
+& \textbf{Lógica} \arrow[d] & \textbf{Orden superior} \arrow[d] \\
+& \text{CCC/Topos} & \text{2-cat, $n$-cat, $\infty$-cat}
+\end{tikzcd}
+\]
+
+\subsection{Notas mínimas por familia}
+\begin{itemize}
+\item \textbf{Orden}: categorías delgadas (preorden/poset).
+\item \textbf{Álgebra}: aditivas/abelianas (núcleos, cokernels, exactitud).
+\item \textbf{Tensor}: monoidales (producto $\otimes$), monoidales cerradas (hom interno).
+\item \textbf{Geometría}: Top, Metric, Man.
+\item \textbf{Homológica}: simpliciales, trianguladas, derivadas.
+\item \textbf{Lógica}: CCC y topos.
+\item \textbf{Orden superior}: 2-categorías, $n$-categorías, $\infty$-categorías.
+\end{itemize}
+
+% ======================================================
+\section{Diagramas listos para ML: LLM, TDA, multi-head, adjunciones}
+
+\subsection{LLM como composición (Set $\to$ Vect $\to$ Prob)}
+Interpretación estándar:
+\[
+LLM = Dec\circ T \circ Emb.
+\]
+Diagrama:
+\[
+\begin{tikzcd}[column sep=huge]
+\mathbf{Set}
+  \arrow[r,"Emb"]
+&
+\mathbf{Vect}
+  \arrow[r,"T"]
+&
+\mathbf{Vect}
+  \arrow[r,"Dec"]
+&
+\mathbf{Prob}
+\end{tikzcd}
+\]
+
+Con la composición explícita:
+\[
+\begin{tikzcd}[column sep=huge]
+\mathbf{Set}
+  \arrow[rrr, bend left=18, "LLM"]
+  \arrow[r,"Emb"]
+&
+\mathbf{Vect}
+  \arrow[r,"T"]
+&
+\mathbf{Vect}
+  \arrow[r,"Dec"]
+&
+\mathbf{Prob}
+\end{tikzcd}
+\]
+
+\subsection{Naturaleza de ``conmutar'' en el pipeline}
+Si tienes una transformación $f:x\to y$ en $\mathbf{Set}$, el requisito funtorial dice:
+\[
+LLM(f) = Dec(T(Emb(f))).
+\]
+Diagrama:
+\[
+\begin{tikzcd}[row sep=large, column sep=huge]
+x \arrow[r,"f"] \arrow[d,"LLM"'] & y \arrow[d,"LLM"] \\
+LLM(x) \arrow[r,"LLM(f)"'] & LLM(y)
+\end{tikzcd}
+\]
+
+\subsection{LLM + TDA (vector topológico)}
+Pipeline típico:
+\[
+\mathbf{Vect}\to \mathbf{Metric}\to \mathbf{SimpComp}\to \mathbf{Ab}\to \mathbf{Vect}.
+\]
+Diagrama:
+\[
+\begin{tikzcd}[column sep=large]
+\mathbf{Vect}
+  \arrow[r,"d\ \text{(métrica)}"]
+&
+\mathbf{Metric}
+  \arrow[r,"VR_\varepsilon\ \text{(Rips)}"]
+&
+\mathbf{SimpComp}
+  \arrow[r,"H_k\ \text{(homología)}"]
+&
+\mathbf{Ab}
+  \arrow[r,"\Phi\ \text{(vectorizar)}"]
+&
+\mathbf{Vect}
+\end{tikzcd}
+\]
+
+\subsection{Funtor de olvido (Metric $\to$ Top)}
+La métrica induce topología (olvidas distancias exactas, conservas abiertos):
+\[
+\begin{tikzcd}[column sep=huge]
+\mathbf{Metric} \arrow[r,"Forget"] & \mathbf{Top}
+\end{tikzcd}
+\]
+
+\subsection{Adjunción (Free $\dashv$ Forget) como diagrama}
+Una forma compacta de recordarlo:
+\[
+\mathrm{Hom}_{\mathbf{Vect}}(Free(S),V)\ \cong\ \mathrm{Hom}_{\mathbf{Set}}(S,Forget(V)).
+\]
+Diagrama:
+\[
+\begin{tikzcd}[row sep=large, column sep=huge]
+\mathbf{Set}
+  \arrow[r, shift left=1.2, "Free"]
+&
+\mathbf{Vect}
+  \arrow[l, shift left=1.2, "Forget"]
+\end{tikzcd}
+\]
+Y se anota $Free \dashv Forget$.
+
+\subsection{Multi-Head: suma directa de cabezas y proyección}
+Modelado estructural:
+\[
+V \xrightarrow{\Delta} V^{\oplus h} \xrightarrow{W_O} V,
+\quad
+\Delta(x)=(h_1(x),\dots,h_h(x)).
+\]
+Diagrama:
+\[
+\begin{tikzcd}[column sep=huge]
+V
+  \arrow[r,"\Delta = h_1 \oplus \cdots \oplus h_h"]
+&
+V^{\oplus h}
+  \arrow[r,"W_O"]
+&
+V
+\end{tikzcd}
+\]
+
+También puedes dibujar ``fork'' (una cabeza arriba y otra abajo, sugerencia visual):
+\[
+\begin{tikzcd}[row sep=large, column sep=large]
+& V \arrow[dl,"h_1"'] \arrow[dr,"h_h"] & \\
+V \arrow[dr, dotted] & & V \arrow[dl, dotted] \\
+& V^{\oplus h} \arrow[d,"W_O"] & \\
+& V &
+\end{tikzcd}
+\]
+(Las punteadas solo indican ``agrupación'' en la suma directa.)
+
+\subsection{Estructura monoidal: coherencia con tensor}
+Si $T$ fuera monoidal (idealización), esperas compatibilidad:
+\[
+T(V\otimes W)\ \cong\ T(V)\otimes T(W).
+\]
+Diagrama (como cuadrado de coherencia):
+\[
+\begin{tikzcd}[row sep=large, column sep=huge]
+V\otimes W \arrow[r,"T"] \arrow[d, "\cong"'] & T(V\otimes W) \arrow[d, dashed, "\text{estructura monoidal}"] \\
+V\otimes W \arrow[r, dashed, "T(V)\otimes T(W)"'] & T(V)\otimes T(W)
+\end{tikzcd}
+\]
+
+\subsection{Optimizador como endomorfismo (dinámica de entrenamiento)}
+Un optimizador define una iteración:
+\[
+\theta_{t+1}=\Phi(\theta_t),\qquad \Phi:\Theta\to \Theta.
+\]
+Diagrama:
+\[
+\begin{tikzcd}[column sep=huge]
+\Theta \arrow[r,"\Phi"] & \Theta \arrow[r,"\Phi"] & \Theta \arrow[r,"\Phi"] & \cdots
+\end{tikzcd}
+\]
+Si $\Theta$ es variedad (Man) o espacio vectorial (Vect) depende de tu formalización.
+
+\subsection{Diagrama completo ``stack ML moderno'' (resumen)}
+Uniendo idea de embeddings, geometría y TDA:
+\[
+\begin{tikzcd}[column sep=large]
+\mathbf{Set}
+  \arrow[r,"Emb"]
+&
+\mathbf{Vect}
+  \arrow[r,"T\ \text{(Transformer)}"]
+&
+\mathbf{Vect}
+  \arrow[r,"d"]
+&
+\mathbf{Metric}
+  \arrow[r,"VR_\varepsilon"]
+&
+\mathbf{SimpComp}
+  \arrow[r,"H_k"]
+&
+\mathbf{Ab}
+  \arrow[r,"\Phi"]
+&
+\mathbf{Vect}
+  \arrow[r,"Dec"]
+&
+\mathbf{Prob}
+\end{tikzcd}
+\]
+
+% ======================================================
+\section{Tips prácticos de \texttt{tikz-cd}}
+\begin{itemize}
+\item Direcciones: \texttt{r,l,u,d,dr,dl,ur,ul}.
+\item Etiqueta al otro lado: \texttt{"f"'}.
+\item Curvar flecha: \texttt{bend left=20} o \texttt{bend right=20}.
+\item Punteada: \texttt{dashed}.
+\item Ajustar espacios: \texttt{[row sep=large, column sep=huge]}.
+\item Mono/Epi: \texttt{hookrightarrow}, \texttt{twoheadrightarrow}.
+\end{itemize}
+
+% ======================================================
+\section{Cierre}
+LLM como funtor compuesto, TDA como cadena de funtores,
+multi-head como suma directa + proyección,
+adjunciones (Free $\dashv$ Forget), coherencia monoidal y optimización como dinámica.
+
+\end{document}
