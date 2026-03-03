@@ -1,0 +1,341 @@
+% ============================================================
+% Documento completo (nuevo) con toda la estructura
+% Categorías: Ab, Top, Familias, Mezclas, Functores + IA
+% ============================================================
+
+\documentclass[12pt,oneside]{book}
+
+% -------------------- Paquetes básicos -----------------------
+\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\usepackage{tikz-cd} % para diagramas con tikz-cd
+\usepackage{enumitem}
+
+% -------------------- Entornos -------------------------------
+\theoremstyle{definition}
+\newtheorem{definition}{Definición}[chapter]
+\newtheorem{example}{Ejemplo}[chapter]
+\newtheorem{remark}{Observación}[chapter]
+
+% ============================================================
+\begin{document}
+
+\frontmatter
+\title{Notas: Categorías, Familias, Combinaciones y Aplicación a IA}
+\author{Octavio}
+\date{\today}
+\maketitle
+
+\tableofcontents
+
+\mainmatter
+
+% ============================================================
+\chapter{Categorías base}
+\label{chap:base}
+
+\section{La categoría \texorpdfstring{$\mathbf{Ab}$}{Ab}: grupos abelianos}
+La categoría $\mathbf{Ab}$ se define así:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objetos:} grupos abelianos $(A,+,0,-)$.
+  \item \textbf{Morfismos:} homomorfismos de grupos $f:A\to B$.
+  \item \textbf{Identidad:} $\mathrm{id}_A:A\to A$.
+  \item \textbf{Composición:} si $f:A\to B$ y $g:B\to C$, entonces $g\circ f:A\to C$.
+\end{itemize}
+
+\section{La categoría \texorpdfstring{$\mathbf{Top}$}{Top}: espacios topológicos}
+La categoría $\mathbf{Top}$ se define así:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objetos:} espacios topológicos $(X,\tau)$.
+  \item \textbf{Morfismos:} funciones continuas $g:X\to Y$.
+  \item \textbf{Identidad y composición:} las usuales de funciones.
+\end{itemize}
+
+% ============================================================
+\chapter{Categorías de familias}
+\label{chap:familias}
+
+\section{Familias con índice fijo: \texorpdfstring{$\mathcal{C}^I$}{C\^{}I}}
+Sea $\mathcal{C}$ una categoría y sea $I$ un conjunto. Considera $I$ como
+\emph{categoría discreta} (solo identidades). Entonces:
+\[
+\mathcal{C}^I \;:=\; \mathrm{Fun}(I_{\mathrm{disc}},\mathcal{C}).
+\]
+Equivalentemente:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objeto:} una familia $(A_i)_{i\in I}$ con $A_i\in \mathrm{Ob}(\mathcal{C})$.
+  \item \textbf{Morfismo:} $(f_i)_{i\in I}:(A_i)\to(B_i)$ con $f_i:A_i\to B_i$ en $\mathcal{C}$.
+  \item \textbf{Identidad:} $(\mathrm{id}_{A_i})_{i\in I}$.
+  \item \textbf{Composición:} $(g_i)\circ(f_i)=(g_i\circ f_i)_{i\in I}$.
+\end{itemize}
+
+\section{Familias con índice variable: \texorpdfstring{$\mathrm{Fam}(\mathcal{C})$}{Fam(C)}}
+La categoría $\mathrm{Fam}(\mathcal{C})$ se define así:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objeto:} un par $(I,A)$ donde $I$ es un conjunto y
+  $A:I\to \mathrm{Ob}(\mathcal{C})$, es decir, una familia $(A_i)_{i\in I}$ de objetos de $\mathcal{C}$.
+  \item \textbf{Morfismo:} de $(I,A)$ a $(J,B)$ es un par
+  \[
+    (u,(f_i)_{i\in I})
+  \]
+  donde $u:I\to J$ es una función y, para cada $i\in I$,
+  \[
+    f_i: A_i \longrightarrow B_{u(i)}
+  \]
+  es un morfismo en $\mathcal{C}$.
+\end{itemize}
+La identidad y composición son:
+\[
+\mathrm{id}_{(I,A)}=\Big(\mathrm{id}_I,\;(\mathrm{id}_{A_i})_{i\in I}\Big),
+\]
+y si $(u,f):(I,A)\to(J,B)$ y $(v,g):(J,B)\to(K,C)$, entonces
+\[
+(v,g)\circ(u,f)=\Big(v\circ u,\;(g_{u(i)}\circ f_i)_{i\in I}\Big).
+\]
+
+\section{Ejemplo: \texorpdfstring{$\mathrm{Fam}(\mathbf{Ab})$}{Fam(Ab)}}
+Un objeto de $\mathrm{Fam}(\mathbf{Ab})$ es una familia de grupos abelianos
+$(A_i)_{i\in I}$. Un morfismo incluye una función $u:I\to J$ y homomorfismos
+$f_i:A_i\to B_{u(i)}$.
+
+% ============================================================
+\chapter{Formas de combinar \texorpdfstring{$\mathbf{Ab}$}{Ab} y \texorpdfstring{$\mathbf{Top}$}{Top}}
+\label{chap:combinar}
+
+\section{Producto de categorías: \texorpdfstring{$\mathbf{Ab}\times\mathbf{Top}$}{Ab x Top}}
+La categoría producto $\mathbf{Ab}\times\mathbf{Top}$ se define así:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objeto:} un par $(A,X)$ con $A\in\mathbf{Ab}$ y $X\in\mathbf{Top}$.
+  \item \textbf{Morfismo:} $(f,g):(A,X)\to(B,Y)$ con $f:A\to B$ en $\mathbf{Ab}$
+  y $g:X\to Y$ en $\mathbf{Top}$.
+  \item \textbf{Identidad:} $(\mathrm{id}_A,\mathrm{id}_X)$.
+  \item \textbf{Composición:} $(f_2,g_2)\circ(f_1,g_1)=(f_2\circ f_1,\;g_2\circ g_1)$.
+\end{itemize}
+Aquí \emph{no} se exige compatibilidad entre la estructura abeliana y la topológica.
+
+\section{Objetos con ambas estructuras compatibles: \texorpdfstring{$\mathbf{TopAb}$}{TopAb}}
+Definimos $\mathbf{TopAb}$ como la categoría de \emph{grupos abelianos topológicos}.
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objeto:} un espacio topológico $A$ con mapas continuos
+  \[
+    +:A\times A\to A,\qquad -:A\to A,\qquad 0:* \to A
+  \]
+  tales que $(A,+,0,-)$ es un grupo abeliano.
+  \item \textbf{Morfismo:} una función continua $f:A\to B$ tal que
+  \[
+    f(x+y)=f(x)+f(y),\qquad f(0)=0,\qquad f(-x)=-f(x).
+  \]
+\end{itemize}
+Equivalente: $\mathbf{TopAb}$ son los \emph{objetos abelianos internos} en $\mathbf{Top}$.
+
+\section{Plantilla para diseñar una categoría ``mezclada''}
+Para construir una categoría de objetos con estructura adicional:
+\begin{enumerate}[leftmargin=1.5em]
+  \item Elige una categoría ambiente $\mathcal{E}$ (por ejemplo $\mathbf{Top}$).
+  \item Especifica los \textbf{datos} (operaciones) como morfismos en $\mathcal{E}$.
+  \item Impone los \textbf{axiomas} como diagramas conmutativos (asociatividad, identidad, inversos, conmutatividad, etc.).
+  \item Define los \textbf{morfismos} como los que preservan esa estructura.
+  \item Verifica identidad y composición: preservan la estructura automáticamente.
+\end{enumerate}
+
+% ============================================================
+\chapter{Functores entre \texorpdfstring{$\mathbf{Ab}$}{Ab} y \texorpdfstring{$\mathbf{Top}$}{Top}}
+\label{chap:funtores}
+
+\section{Qué es un funtor}
+Un funtor $F:\mathcal{C}\to\mathcal{D}$ consiste de:
+\begin{itemize}[leftmargin=1.5em]
+  \item asignación en objetos: $A\mapsto F(A)$,
+  \item asignación en morfismos: $f:A\to B \mapsto F(f):F(A)\to F(B)$,
+\end{itemize}
+tal que:
+\[
+F(\mathrm{id}_A)=\mathrm{id}_{F(A)},\qquad
+F(g\circ f)=F(g)\circ F(f).
+\]
+
+\section{Funtor discreto: \texorpdfstring{$D:\mathbf{Ab}\to\mathbf{Top}$}{D:Ab->Top}}
+Definimos $D$ por:
+\[
+D(A)=\text{$A$ con topología discreta},\qquad D(f)=f \text{ (misma función)}.
+\]
+Entonces $D$ es un funtor porque preserva identidades y composición.
+
+\section{Funtor de olvido: \texorpdfstring{$U:\mathbf{TopAb}\to\mathbf{Ab}$}{U:TopAb->Ab}}
+Definimos $U$ por:
+\[
+U(A,\tau,+,0,-)=(A,+,0,-),\qquad U(f)=f.
+\]
+Es un funtor que \emph{olvida} la topología.
+
+\section{Homología singular: \texorpdfstring{$H_n:\mathbf{Top}\to\mathbf{Ab}$}{Hn:Top->Ab}}
+Para cada $n\ge 0$ existe un funtor (invariante) llamado homología singular:
+\[
+H_n:\mathbf{Top}\to\mathbf{Ab},
+\]
+que asigna a un espacio topológico $X$ un grupo abeliano $H_n(X)$,
+y a una función continua $g:X\to Y$ un homomorfismo inducido
+\[
+H_n(g):H_n(X)\to H_n(Y),
+\]
+cumpliendo:
+\[
+H_n(\mathrm{id}_X)=\mathrm{id}_{H_n(X)},\qquad
+H_n(g\circ f)=H_n(g)\circ H_n(f).
+\]
+
+% ============================================================
+\chapter{Coproductos y suma directa desde familias}
+\label{chap:suma-directa}
+
+\section{Suma directa desde familias en \texorpdfstring{$\mathbf{Ab}$}{Ab}}
+Como $\mathbf{Ab}$ tiene coproductos (sumas directas), existe un funtor:
+\[
+\Sigma:\mathrm{Fam}(\mathbf{Ab})\to\mathbf{Ab},\qquad
+\Sigma(I,(A_i))=\bigoplus_{i\in I} A_i.
+\]
+Este funtor ``colapsa'' una familia de grupos abelianos a su suma directa.
+
+\begin{remark}
+En práctica, $\bigoplus_{i\in I} A_i$ es el coproducto en $\mathbf{Ab}$:
+elementos con soporte finito sobre el índice $I$.
+\end{remark}
+
+% ============================================================
+\chapter{Abstracción categórica aplicada a cálculos de IA}
+\label{chap:cat-ia}
+
+\section{Motivación: separar estructura de contenido}
+En IA es común construir \emph{pipelines} de transformación y modelos compuestos.
+La abstracción categórica separa:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Estructura:} composición, productos/coprodcutos, invariancias.
+  \item \textbf{Contenido:} datos concretos y parámetros entrenables.
+\end{itemize}
+
+\section{Ventajas concretas}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Composición = pipelines.} Cada etapa es un morfismo; el pipeline es composición.
+  \item \textbf{Modularidad.} Cambias un bloque conservando dominio/codominio y todo sigue bien definido.
+  \item \textbf{Reuso y pruebas.} Diagramas conmutativos funcionan como pruebas de coherencia.
+  \item \textbf{Optimización algebraica.} Reasociar/fusionar cómputos sin cambiar resultados.
+  \item \textbf{Batching como familias.} Un mini-batch se modela en $\mathcal{C}^I$.
+  \item \textbf{Invariancias explícitas.} Simetrías como acciones de grupo reducen complejidad efectiva.
+  \item \textbf{Interoperabilidad.} Functores conectan representaciones (imagen$\to$grafo$\to$TDA$\to$vector).
+\end{itemize}
+
+\section{Ejemplo 1: Pipeline de IA como composición}
+Define una categoría (conceptual) $\mathcal{P}$:
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Objetos:} espacios de datos (Raw, Tokens, Embeddings, Logits, \dots).
+  \item \textbf{Morfismos:} transformaciones computables (tokenizar, normalizar, embed, clasificar).
+\end{itemize}
+
+Un pipeline típico:
+\[
+\mathrm{Raw}
+\xrightarrow{\;\mathrm{tokenize}\;}
+\mathrm{Tokens}
+\xrightarrow{\;\mathrm{embed}\;}
+\mathrm{Emb}
+\xrightarrow{\;\mathrm{head}\;}
+\mathrm{Logits}.
+\]
+El modelo completo es el morfismo compuesto:
+\[
+\mathrm{head}\circ \mathrm{embed}\circ \mathrm{tokenize}:\mathrm{Raw}\to \mathrm{Logits}.
+\]
+
+\section{Ejemplo 2: Mini-batching como familia}
+Sea $\mathcal{C}$ una categoría (p.ej.\ $\mathbf{Vect}$) e $I$ un conjunto índice.
+Entonces:
+\[
+\mathcal{C}^I=\mathrm{Fun}(I_{\mathrm{disc}},\mathcal{C}).
+\]
+Un batch de embeddings:
+\[
+(E_i)_{i\in I}\in \mathbf{Vect}^I.
+\]
+Aplicar una transformación por componente:
+\[
+(f_i:E_i\to E_i')_{i\in I}:(E_i)_{i\in I}\to (E_i')_{i\in I},
+\]
+y composición por componente:
+\[
+(g_i)\circ(f_i)=(g_i\circ f_i)_{i\in I}.
+\]
+
+\section{Ejemplo 3: TDA como cadena de traductores (funtores)}
+Esquema conceptual:
+\[
+\text{Datos}
+\longrightarrow
+\text{Complejos simpliciales}
+\longrightarrow
+\text{Módulos de persistencia}
+\longrightarrow
+\mathbf{Vect}.
+\]
+Más explícito:
+\[
+(X,d)
+\xmapsto{\;\mathrm{VR}_\bullet\;}
+\{\mathrm{VR}_\epsilon(X)\}_{\epsilon\ge 0}
+\xmapsto{\;H_k\;}
+\{H_k(\mathrm{VR}_\epsilon(X))\}_{\epsilon\ge 0}
+\xmapsto{\;\Phi\;}
+\mathbb{R}^m.
+\]
+
+\section{Ejemplo 4: Backprop y composición (lectura estructural)}
+En entrenamiento:
+\[
+\theta \leftarrow \theta - \eta \nabla_{\theta}\mathcal{L}.
+\]
+Si el modelo es una composición:
+\[
+f=f_n\circ f_{n-1}\circ\cdots\circ f_1,
+\]
+la regla de la cadena expresa compatibilidad con la composición:
+\[
+D(f_n\circ\cdots\circ f_1)=Df_n\circ\cdots\circ Df_1,
+\]
+con las composiciones adecuadas (jacobianos/diferenciales).
+
+\section{Reglas prácticas: tamaño y control de combinaciones}
+No hay un límite universal de combinaciones, pero sí restricciones por \emph{tamaño}.
+
+\subsection{Categorías grandes y familias pequeñas}
+Permitir índices arbitrarios en $\mathrm{Fam}(\mathcal{C})$ puede producir una categoría
+muy grande. Para controlar esto se usan restricciones típicas:
+\begin{itemize}[leftmargin=1.5em]
+  \item $\mathrm{Fam}_{\mathrm{fin}}(\mathcal{C})$: solo familias con índice finito.
+  \item $\mathrm{Fam}_{\mathbb{N}}(\mathcal{C})$: solo familias numerables.
+  \item $\mathrm{Fam}_{U}(\mathcal{C})$: índices ``pequeños'' respecto a un universo de Grothendieck $U$.
+\end{itemize}
+
+% ============================================================
+\backmatter
+\chapter*{Notas finales}
+Si quieres, en el siguiente paso podemos agregar:
+\begin{itemize}[leftmargin=1.5em]
+  \item diagramas conmutativos de axiomas de grupo en $\mathbf{TopAb}$ usando \texttt{tikz-cd},
+  \item un ejemplo completo de acción de grupo e invariancia (p.ej.\ traslaciones en imágenes),
+  \item una sección de ``categorías para deep learning'' (Monoidal categories / string diagrams).
+\end{itemize}
+
+\end{document}

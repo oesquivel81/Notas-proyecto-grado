@@ -1,0 +1,34 @@
+{
+  "patient_id": 23,
+  "rx_path": "Scoliosis/S_23.jpg",
+  "label_binary_path": "LabelBinaryJPG/Label_S_23.jpg",
+  "curve_csv": "RadiographMetrics/curves_csv/curve_23.csv",
+  "overlay_png": "RadiographMetrics/overlays/overlay_23.png",
+  "overlay_metrics_png": "RadiographMetrics/overlays_metrics/overlay_metrics_23.png",
+  "metrics_json": "RadiographMetrics/metrics_json/metrics_23.json",
+  "cobb_angle_deg": 59.49348567018235,
+  "denoise_info": {
+    "R0": 0.07031351183309198,
+    "kill": 6,
+    "wave": "db4"
+  },
+  "cobb_curve_metrics": {
+    "i_inf_below": 241,
+    "i_inf_above": 390,
+    "i_apex_global": 298,
+    "i_apex_lumbar": 485,
+    "has_lumbar_apex": true,
+    "m_inf_below": 0.4302253723144531,
+    "m_inf_above": -0.7322883605957031,
+    "cobb_deg": 59.49348567018235,
+    "x_csvl_geom": 264.9050222869904,
+    "dist_csvl_px": 53.59376969299626
+  },
+  "csvl": {
+    "x_px": 266,
+    "y_top_px": 3,
+    "y_bottom_px": 698,
+    "definition": "CSVL: vertical por x=mediana en la franja inferior de la máscara; segmento desde el borde superior del recorte hasta la mitad de esa franja."
+  },
+  "num_points": 730
+}

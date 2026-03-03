@@ -1,0 +1,47 @@
+{
+  "paths": {
+    "RadiographMetrics/curves_csv": "Curvas centroidales por paciente (CSV).",
+    "RadiographMetrics/overlays": "Overlays RX + curva + CSVL (sin cobb).",
+    "RadiographMetrics/overlays_metrics": "Overlays RX + curva + CSVL + líneas Cobb.",
+    "RadiographMetrics/metrics_json": "JSON por paciente con métricas y metadatos.",
+    "RadiographMetrics/radiograph_metrics.csv": "Tabla resumen por paciente."
+  },
+  "radiograph_metrics.csv": {
+    "columns": {
+      "patient_id": "ID numérico extraído del nombre (S_###).",
+      "rx_path": "Ruta RELATIVA (desde OUTPUT_ROOT) a la radiografía.",
+      "label_binary_path": "Ruta relativa a Label_S_###.jpg.",
+      "curve_csv": "Ruta relativa a curve_{ID}.csv.",
+      "overlay_png": "Ruta relativa a overlay_{ID}.png.",
+      "overlay_metrics_png": "Ruta relativa a overlay_metrics_{ID}.png.",
+      "metrics_json": "Ruta relativa a metrics_{ID}.json.",
+      "cobb_angle_deg": "Ángulo de Cobb (grados)."
+    },
+    "note": "Todas las rutas se guardan relativas a OUTPUT_ROOT para portabilidad."
+  },
+  "metrics_{ID}.json": {
+    "fields": {
+      "patient_id": "ID del paciente.",
+      "curve_csv": "Ruta relativa al CSV de curva.",
+      "overlay_png": "Ruta relativa al overlay simple.",
+      "overlay_metrics_png": "Ruta relativa al overlay con líneas Cobb.",
+      "metrics_json": "Ruta relativa al propio JSON (conveniencia).",
+      "cobb_angle_deg": "Ángulo de Cobb (grados).",
+      "csvl": {
+        "x_px": "Coordenada x de la CSVL (px).",
+        "y_top_px": "y inicio (px).",
+        "y_bottom_px": "y fin (px).",
+        "definition": "Definición textual de la CSVL."
+      },
+      "num_points": "Número de puntos (x,y) en curve_{ID}.csv.",
+      "denoise_info": "Detalles del denoise multiescala.",
+      "cobb_curve_metrics": "Índices y pendientes usados para Cobb."
+    }
+  },
+  "curve_{ID}.csv": {
+    "columns": {
+      "x_px": "x en píxeles (imagen original).",
+      "y_px": "y en píxeles (imagen original)."
+    }
+  }
+}
