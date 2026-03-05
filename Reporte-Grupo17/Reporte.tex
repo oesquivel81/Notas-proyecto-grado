@@ -10,12 +10,20 @@
 \usepackage{cite}
 \usepackage{url}
 \usepackage{microtype} % opcional, recomendado
+\usepackage{subfig}
+% Requiere en el preámbulo:
+% \usepackage{subfig}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
 
 % --- TikZ (pipeline) + TikZ-CD (diagramas conmutativos) ---
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc}
 \usepackage{tikz-cd}
 \usepackage{adjustbox}
+\usepackage{float}    
+\usepackage{placeins}  
+
 
 \title{Segmentación automática de columna vertebral y vértebras en radiografías con escoliosis para entornos con recursos computacionales limitados}
 
@@ -30,7 +38,15 @@ j.morrill@uniandes.edu.co, j.williams@uniandes.edu.co, d.delgado@uniandes.edu.co
 \maketitle
 
 \begin{abstract}
-% Abstract provisional (puedes dejarlo vacío por ahora)
+
+La segmentación automática de la columna vertebral en radiografías es una tarea compleja debido a la superposición de estructuras anatómicas, variabilidad morfológica y limitaciones en la calidad de las imágenes. Los métodos actuales basados en redes convolucionales y Transformers han mostrado buenos resultados en tomografía computarizada, pero su aplicación en radiografías 2D sigue siendo limitada y depende frecuentemente de postprocesamientos heurísticos.
+
+En este trabajo se propone un modelo híbrido que combina redes convolucionales, análisis topológico de datos (TDA) y Transformers con atención kernelizada para mejorar la segmentación vertebral. El modelo incorpora descriptores topológicos y geométricos en el espacio de representación, permitiendo capturar simultáneamente información local, global y estructural.
+
+La arquitectura propuesta introduce un Transformer multi-kernel donde cada cabeza de atención opera sobre distintos espacios de representación (CNN, topológico y manifold). Este enfoque busca mejorar la coherencia anatómica de la segmentación en radiografías con escoliosis.
+
+El trabajo presenta el marco teórico y la metodología propuesta para integrar geometría diferencial y análisis topológico dentro de arquitecturas profundas para segmentación médica.
+
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -38,7 +54,6 @@ spine, vertebra segmentation, transformer, topological data analysis, persistent
 \end{IEEEkeywords}
 
 \section{Introducción}
-
 
 \section{Estado del Arte}
 \label{sec:sota}
@@ -116,6 +131,14 @@ Objetivo: eliminar heurísticas integrando tokens vertebrales + TDA/geo dentro d
 \end{table*}
 
 \section{Marco Teórico}
+
+\subsection{Redes Convolucionales para Segmentación Médica}
+
+\subsection{Transformers en Visión Computacional}
+
+\subsection{Análisis Topológico de Datos}
+
+\subsection{Geometría Diferencial en Representaciones de Datos}
 
 \section{Metodología Propuesta}
 
@@ -429,8 +452,297 @@ Dependiendo del problema, la salida $\mathcal{Y}$ puede representar:
 \end{itemize}
 
 \subsection{Dataset}
+
+El dataset utilizado contiene radiografías anteroposteriores de columna vertebral
+correspondientes a pacientes con y sin escoliosis. Cada imagen incluye diferentes
+niveles de anotación que permiten analizar la estructura anatómica de la columna.
+
+Las representaciones disponibles incluyen:
+
+\begin{itemize}
+
+\item \textbf{Radiografía original}: imagen médica en escala de grises.
+
+\item \textbf{Máscara binaria}: segmentación de la columna vertebral donde los
+píxeles pertenecientes a la columna toman valor 255 y el resto corresponde al fondo.
+
+\item \textbf{Segmentación multiclase}: cada vértebra se representa con una etiqueta
+independiente (por ejemplo C7, T1--T12, L1--L5).
+
+\item \textbf{Curva espinal}: línea central de la columna estimada a partir de la
+máscara segmentada.
+
+\item \textbf{Métricas clínicas}: cálculo automático del ángulo de Cobb,
+utilizado para cuantificar la severidad de la escoliosis.
+
+\end{itemize}
+
+\begin{figure}[!t]
+\centering
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{cc}
+\subfloat[Radiografía AP]{\includegraphics[width=0.27\linewidth]{imagenes/S_94.jpg}} &
+\subfloat[Segmentación multiclase]{\includegraphics[width=0.27\linewidth]{imagenes/LabelMulti_S_64.jpg}}
+\end{tabular}
+
+\caption{Ejemplos del dataset: (a) radiografía anteroposterior de columna
+y (b) segmentación multiclase de las vértebras.}
+
+\label{fig:dataset_images}
+
+\end{figure}
+
+A partir de la segmentación es posible obtener representaciones geométricas
+de la columna vertebral. En particular, se puede estimar la línea central
+de la columna y calcular métricas clínicas como el ángulo de Cobb, ampliamente
+utilizado en la práctica médica para evaluar la severidad de la escoliosis.
+
+\begin{figure}[!t]
+\centering
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{cc}
+\subfloat[Línea central estimada]{\includegraphics[width=0.27\linewidth]{imagenes/overlay_21.png}} &
+\subfloat[Métricas clínicas (Cobb)]{\includegraphics[width=0.27\linewidth]{imagenes/overlay_metrics_21.png}}
+\end{tabular}
+
+\caption{Representaciones derivadas del dataset: (c) línea central estimada
+de la columna y (d) cálculo del ángulo de Cobb para evaluar la deformidad espinal.}
+
+\label{fig:dataset_metrics}
+
+\end{figure}
+
+
 \subsection{Preprocesamiento}
-\subsection{Arquitectura del Modelo}
+\subsection{Arquitectura del modelo}
+
+La arquitectura propuesta integra extracción de características profundas,
+representaciones geométricas y modelado contextual global. El objetivo es
+capturar tanto patrones locales presentes en las radiografías como la
+estructura geométrica global de la columna vertebral.
+
+Sea una radiografía de entrada
+
+\[
+I \in \mathbb{R}^{H \times W},
+\]
+
+donde \(H\) y \(W\) representan las dimensiones de la imagen.
+
+El pipeline completo del modelo puede representarse como la composición
+
+\[
+I
+\xrightarrow{\phi}
+Z^{cnn}
+\xrightarrow{\tau}
+Z^{topo}
+\xrightarrow{k}
+\tilde{Z}
+\xrightarrow{\mathcal{T}}
+\hat{Y}.
+\]
+
+Cada una de estas transformaciones captura diferentes propiedades
+estructurales de los datos.
+
+\subsubsection{Extracción de características mediante CNN}
+
+La primera etapa utiliza una red neuronal convolucional para extraer
+características espaciales de la radiografía. Formalmente, la CNN define
+una función
+
+\[
+f_\theta : \mathbb{R}^{H \times W} \rightarrow \mathbb{R}^{n \times d},
+\]
+
+que transforma la imagen de entrada en un conjunto de embeddings
+
+\[
+Z^{cnn} = f_\theta(I) =
+\{z_1, z_2, \dots, z_n\},
+\quad z_i \in \mathbb{R}^d.
+\]
+
+Estos vectores representan descriptores locales de la anatomía de la
+columna vertebral, capturando información de bordes, texturas y patrones
+estructurales presentes en la imagen.
+
+\subsubsection{Estructura geométrica y manifold}
+
+Los embeddings generados por la CNN pueden interpretarse como puntos en
+un espacio euclidiano de dimensión \(d\)
+
+\[
+Z^{cnn} \subset \mathbb{R}^d.
+\]
+
+Bajo la hipótesis de variedad, se asume que estos puntos se encuentran
+aproximadamente sobre una variedad de menor dimensión
+
+\[
+\mathcal{M} \subset \mathbb{R}^d,
+\]
+
+la cual describe la geometría intrínseca de la estructura anatómica
+presente en la imagen.
+
+Esta interpretación permite estudiar la estructura global de los datos
+mediante herramientas geométricas y topológicas.
+
+\subsubsection{Representación topológica mediante complejos simpliciales}
+
+Para capturar relaciones geométricas entre los puntos del embedding se
+construye un complejo simplicial utilizando una filtración de
+Vietoris--Rips.
+
+Sea
+
+\[
+Z = \{z_1,\dots,z_n\}
+\]
+
+el conjunto de embeddings. Para un parámetro de escala
+\(\varepsilon > 0\), el complejo simplicial se define como
+
+\[
+VR_\varepsilon(Z) =
+\{\sigma \subseteq Z :
+d(z_i,z_j) \le \varepsilon
+\ \forall z_i,z_j \in \sigma\}.
+\]
+
+Este complejo permite modelar relaciones de conectividad entre los
+puntos y capturar propiedades topológicas del conjunto de embeddings.
+
+A partir de esta estructura se obtiene un vector de características
+topológicas
+
+\[
+Z^{topo} = \tau(VR_\varepsilon(Z)) \in \mathbb{R}^{d_t},
+\]
+
+donde \(\tau\) representa un operador de resumen topológico.
+
+\subsubsection{Representación mediante kernels}
+
+Con el objetivo de modelar relaciones no lineales entre los embeddings,
+se introduce una función kernel
+
+\[
+k(x_i,x_j) =
+\langle \Phi(x_i), \Phi(x_j) \rangle_{\mathcal{H}},
+\]
+
+donde
+
+\begin{itemize}
+
+\item \(\Phi(\cdot)\) es una función que proyecta los datos en un
+espacio de características de mayor dimensión
+
+\item \(\mathcal{H}\) es un espacio de Hilbert con producto interno
+
+\end{itemize}
+
+Esta formulación define un espacio de representación no lineal conocido
+como \emph{Reproducing Kernel Hilbert Space} (RKHS).
+
+Algunos kernels utilizados comúnmente son
+
+\[
+k_{linear}(x_i,x_j) = x_i^\top x_j
+\]
+
+\[
+k_{RBF}(x_i,x_j) =
+\exp\left(-\frac{\|x_i-x_j\|^2}{2\sigma^2}\right)
+\]
+
+\[
+k_{poly}(x_i,x_j) =
+(x_i^\top x_j + c)^p.
+\]
+
+El kernel induce una matriz de similitud
+
+\[
+K_{ij} = k(z_i,z_j),
+\]
+
+que captura relaciones estructurales entre los embeddings.
+
+\subsubsection{Modelado contextual mediante Transformer}
+
+Los embeddings enriquecidos se procesan mediante un encoder Transformer
+que modela relaciones globales entre los diferentes tokens.
+
+Sea
+
+\[
+\tilde{Z} = \{\tilde{z}_1,\dots,\tilde{z}_n\}
+\]
+
+la secuencia de tokens enriquecidos. El mecanismo de auto-atención se
+define como
+
+\[
+\mathrm{Attention}(Q,K,V)
+=
+\mathrm{softmax}
+\left(
+\frac{QK^\top}{\sqrt{d_k}}
+\right)V.
+\]
+
+Este mecanismo permite que cada token interactúe con todos los demás
+tokens, capturando dependencias globales dentro de la estructura de la
+columna vertebral.
+
+\subsubsection{Formulación global del pipeline}
+
+De manera compacta, el modelo completo puede expresarse como
+
+\[
+\hat{Y}
+=
+\mathcal{T}
+\left(
+k
+\left(
+\tau
+\left(
+f_\theta(I)
+\right)
+\right)
+\right).
+\]
+
+Esta formulación resume el flujo del modelo: primero se extraen
+características locales mediante una CNN, posteriormente se modela la
+estructura geométrica de los embeddings mediante complejos simpliciales,
+se enriquecen las relaciones entre representaciones mediante kernels y
+finalmente un Transformer captura dependencias globales entre tokens.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{imagenes/model_architecture.png}
+\caption{
+Arquitectura general del modelo propuesto. La radiografía de entrada se
+procesa mediante una red convolucional que extrae embeddings espaciales.
+Estos embeddings se interpretan como puntos en un espacio métrico que
+aproximan una variedad geométrica. Sobre este conjunto se construyen
+complejos simpliciales para capturar relaciones topológicas entre los
+puntos. Posteriormente se aplican funciones kernel para enriquecer el
+espacio de representación y finalmente un encoder Transformer modela
+las relaciones globales entre tokens para capturar la estructura
+completa de la columna vertebral.
+}
+\label{fig:model_architecture}
+\end{figure}
+
 \subsection{Entrenamiento}
 \subsection{Métricas de Evaluación}
 
