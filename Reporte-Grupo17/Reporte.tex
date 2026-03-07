@@ -7,7 +7,6 @@
 % --- Utilidades básicas ---
 \usepackage{graphicx}
 \usepackage{amsmath, amssymb}
-\usepackage{cite}
 \usepackage{url}
 \usepackage{microtype} % opcional, recomendado
 \usepackage{subfig}
@@ -23,7 +22,12 @@
 \usepackage{adjustbox}
 \usepackage{float}    
 \usepackage{placeins}  
-
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
 
 \title{Segmentación automática de columna vertebral y vértebras en radiografías con escoliosis para entornos con recursos computacionales limitados}
 
@@ -36,6 +40,7 @@ j.morrill@uniandes.edu.co, j.williams@uniandes.edu.co, d.delgado@uniandes.edu.co
 
 \begin{document}
 \maketitle
+\thispagestyle{fancy}
 
 \begin{abstract}
 
@@ -55,14 +60,56 @@ spine, vertebra segmentation, transformer, topological data analysis, persistent
 
 \section{Introducción}
 
+La escoliosis es una deformidad tridimensional de la columna vertebral caracterizada por una curvatura lateral anormal acompañada de rotación vertebral. Esta condición puede progresar durante el crecimiento y afectar significativamente la postura, la función respiratoria y la calidad de vida de los pacientes. El diagnóstico y seguimiento clínico se realizan principalmente mediante radiografías anteroposteriores de columna vertebral.
+
+La severidad de la escoliosis se evalúa clínicamente mediante el ángulo de Cobb, el cual se calcula identificando manualmente las vértebras límite de la curvatura y midiendo el ángulo formado entre sus placas terminales. Aunque este método es ampliamente utilizado en la práctica clínica, su estimación depende de la selección manual de puntos anatómicos, lo que introduce variabilidad entre observadores y reduce la reproducibilidad de las mediciones.
+
+Los avances recientes en aprendizaje profundo han permitido desarrollar métodos automáticos para el análisis de imágenes médicas, incluyendo la segmentación de estructuras anatómicas y la estimación de métricas clínicas. Sin embargo, muchos enfoques se basan únicamente en representaciones locales aprendidas por redes convolucionales, sin incorporar explícitamente información geométrica o topológica de la estructura de la columna vertebral.
+
+En este trabajo se propone un enfoque híbrido que combina redes convolucionales, análisis topológico de datos y modelos tipo Transformer para modelar la geometría de la columna vertebral a partir de radiografías. La idea central consiste en enriquecer las representaciones obtenidas por redes convolucionales con información estructural derivada de la segmentación vertebral, permitiendo estimar automáticamente métricas clínicas como el ángulo de Cobb y caracterizar la deformidad espinal.
+
+Las principales contribuciones de este trabajo son:
+
+\begin{itemize}
+
+\item Un pipeline computacional para el análisis automático de radiografías de columna vertebral.
+
+\item La integración de representaciones geométricas y topológicas derivadas de la segmentación vertebral.
+
+\item Un marco experimental escalable para la ejecución paralela de experimentos y evaluación de modelos.
+
+\item La estimación automática de métricas clínicas relevantes para la evaluación de la escoliosis.
+
+\end{itemize}
+
+\section{Objetivos}
+
+\subsection{Objetivo general}
+
+Desarrollar un modelo híbrido basado en CNN, análisis topológico de datos y Transformers kernelizados para la segmentación automática de vértebras y la estimación del ángulo de Cobb en radiografías de columna vertebral.
+
+\subsection{Objetivos específicos}
+
+\begin{itemize}
+
+\item Diseñar una arquitectura que combine representaciones convolucionales, topológicas y geométricas.
+
+\item Implementar un Transformer multi-kernel capaz de integrar múltiples espacios de representación.
+
+\item Evaluar el desempeño del modelo en tareas de segmentación vertebral utilizando métricas estándar de segmentación médica.
+
+\item Analizar el impacto de descriptores topológicos en la coherencia anatómica de la segmentación.
+
+\end{itemize}
+
 \section{Estado del Arte}
 \label{sec:sota}
 
-La segmentación automática de columna y vértebras ha evolucionado rápidamente con arquitecturas profundas que combinan extracción local de rasgos y modelado de contexto global. En tomografía computarizada (CT) 3D, predominan enfoques tipo U-Net y variantes modernas (p.ej., nnU-Net), que han establecido baselines fuertes para segmentación vertebral multi-etiqueta. Más recientemente, los Transformers se han incorporado para capturar dependencias de largo alcance y mejorar la consistencia anatómica, especialmente en escenarios de \emph{arbitrary field-of-view} (FOV) donde el número de vértebras visibles y su escala varían.
+La segmentación automática de columna y vértebras ha evolucionado rápidamente con arquitecturas profundas que combinan extracción local de rasgos y modelado de contexto global. En tomografía computarizada (CT) 3D, predominan enfoques tipo U-Net y variantes modernas como nnU-Net, que han establecido baselines fuertes en segmentación médica y sirven como referencia para segmentación vertebral multi-etiqueta \cite{ronneberger2015unet,isensee2021nnunet}. Más recientemente, los Transformers se han incorporado para capturar dependencias de largo alcance y mejorar la consistencia anatómica, especialmente en escenarios de \emph{arbitrary field-of-view} (FOV) donde el número de vértebras visibles y su escala varían \cite{tao2022spine_transformers,you2023verteformer,zhang2023swinspine,li2024verformer}.
 
-En el contexto Transformer, se observan dos tendencias principales. La primera adopta paradigmas tipo DETR para tratar la detección/etiquetado vertebral como un problema de predicción de conjuntos mediante \emph{query tokens} (consultas aprendibles) asociados a instancias anatómicas, que luego guían etapas de segmentación. La segunda integra Transformers (ViT/Swin) dentro de arquitecturas encoder--decoder tipo U-Net, operando sobre \emph{patch tokens} o \emph{feature tokens} para proveer contexto global en la segmentación densa. En varios trabajos, la \emph{anatomy-awareness} se introduce mediante tareas auxiliares y regularizadores geométricos simples, por ejemplo: módulos de detección de bordes para reforzar la separación entre vértebras adyacentes, o aprendizaje multi-tarea con detección de centroides que aporta una señal global de localización y reduce errores en vértebras terminales o raras.
+En el contexto Transformer, se observan dos tendencias principales. La primera adopta paradigmas tipo DETR para tratar la detección y el etiquetado vertebral como un problema de predicción de conjuntos mediante \emph{query tokens} asociados a instancias anatómicas, que luego guían etapas de segmentación \cite{tao2022spine_transformers}. La segunda integra Transformers tipo ViT o Swin dentro de arquitecturas encoder--decoder tipo U-Net, operando sobre \emph{patch tokens} o \emph{feature tokens} para proveer contexto global en la segmentación densa \cite{you2022eg_trans3dunet,you2023verteformer,zhang2023swinspine}. En varios trabajos, la \emph{anatomy-awareness} se introduce mediante tareas auxiliares y regularizadores geométricos simples, por ejemplo módulos de detección de bordes para reforzar la separación entre vértebras adyacentes, o aprendizaje multi-tarea con detección de centroides que aporta una señal global de localización y reduce errores en vértebras terminales o raras \cite{you2022eg_trans3dunet,aydogdu2024centroid,li2024verformer}.
 
-Sin embargo, pese a estos avances, la información geométrica y topológica incorporada en la mayoría de métodos es limitada. En general, la ``geometría'' se reduce a cajas, centroides, mapas de borde o codificaciones posicionales estándar, sin incluir descriptores formales de geometría diferencial (curvatura, geodésicas) ni resúmenes topológicos provenientes de TDA (p. ej., homología persistente, números de Betti, \emph{persistence diagrams/images}). Esto es particularmente notorio en radiografías 2D (X-ray), donde los trabajos basados en Transformers son escasos y suelen depender de postprocesamientos heurísticos para corregir fusiones o incongruencias entre vértebras. En consecuencia, existe una oportunidad clara para modelos que representen explícitamente cada vértebra como un token anatómico enriquecido con descriptores topológicos y geométricos, y que utilicen atención informada por estructura (adyacencia anatómica, distancias geodésicas, perfil de curvatura) para mejorar la fidelidad anatómica de la segmentación en X-ray.
+Sin embargo, pese a estos avances, la información geométrica y topológica incorporada en la mayoría de métodos revisados es limitada. En general, la ``geometría'' se reduce a cajas, centroides, mapas de borde o codificaciones posicionales estándar, sin incluir descriptores formales de geometría diferencial como curvatura o geodésicas, ni resúmenes topológicos provenientes de TDA, por ejemplo homología persistente o números de Betti \cite{tao2022spine_transformers,you2023verteformer,li2024verformer,aydogdu2024centroid}. Esto es particularmente notorio en radiografías 2D (X-ray), donde los trabajos basados en Transformers son escasos y suelen depender de postprocesamientos heurísticos para corregir fusiones o incongruencias entre vértebras \cite{zhang2022xray_transformer,aydogdu2024centroid}. En consecuencia, existe una oportunidad clara para modelos que representen explícitamente cada vértebra como un token anatómico enriquecido con descriptores topológicos y geométricos, y que utilicen atención informada por estructura para mejorar la fidelidad anatómica de la segmentación \cite{clough2020topological,hu2019topology}.
 
 \begin{table*}[t]
 \centering
@@ -139,6 +186,42 @@ Objetivo: eliminar heurísticas integrando tokens vertebrales + TDA/geo dentro d
 \subsection{Análisis Topológico de Datos}
 
 \subsection{Geometría Diferencial en Representaciones de Datos}
+
+
+\section{Definición del Problema}
+
+Sea $I : \Omega \rightarrow \mathbb{R}$ una radiografía de columna vertebral, donde
+$\Omega \subset \mathbb{R}^2$ representa el dominio espacial de la imagen.
+
+El objetivo del modelo es estimar una función de segmentación
+
+\[
+f_\theta : I \rightarrow Y
+\]
+
+donde
+
+\[
+Y : \Omega \rightarrow \{0,1,\dots,C-1\}
+\]
+
+representa una máscara de segmentación multiclase en la cual cada píxel es
+asignado a una de las $C$ clases correspondientes a las vértebras de la columna
+vertebral o al fondo.
+
+A partir de esta segmentación es posible derivar representaciones geométricas
+de la columna vertebral, incluyendo la línea central de la columna y métricas
+clínicas como el ángulo de Cobb.
+
+El objetivo del aprendizaje consiste en encontrar los parámetros $\theta$
+que minimizan una función de pérdida definida sobre el conjunto de entrenamiento
+
+\[
+\theta^* = \arg\min_{\theta} \; \mathbb{E}_{(I,Y) \sim D}
+\left[ \mathcal{L}(f_\theta(I),Y) \right]
+\]
+
+donde $D$ representa la distribución de datos del dataset.
 
 \section{Metodología Propuesta}
 
@@ -514,245 +597,345 @@ de la columna y (d) cálculo del ángulo de Cobb para evaluar la deformidad espi
 
 \end{figure}
 
+\subsection{Características del dataset}
 
-\subsection{Preprocesamiento}
-\subsection{Arquitectura del modelo}
+El dataset contiene radiografías anteroposteriores de columna vertebral anotadas a nivel de vértebra. Las imágenes presentan variabilidad en resolución, contraste y grado de deformidad espinal.
 
-La arquitectura propuesta integra extracción de características profundas,
-representaciones geométricas y modelado contextual global. El objetivo es
-capturar tanto patrones locales presentes en las radiografías como la
-estructura geométrica global de la columna vertebral.
-
-Sea una radiografía de entrada
-
-\[
-I \in \mathbb{R}^{H \times W},
-\]
-
-donde \(H\) y \(W\) representan las dimensiones de la imagen.
-
-El pipeline completo del modelo puede representarse como la composición
-
-\[
-I
-\xrightarrow{\phi}
-Z^{cnn}
-\xrightarrow{\tau}
-Z^{topo}
-\xrightarrow{k}
-\tilde{Z}
-\xrightarrow{\mathcal{T}}
-\hat{Y}.
-\]
-
-Cada una de estas transformaciones captura diferentes propiedades
-estructurales de los datos.
-
-\subsubsection{Extracción de características mediante CNN}
-
-La primera etapa utiliza una red neuronal convolucional para extraer
-características espaciales de la radiografía. Formalmente, la CNN define
-una función
-
-\[
-f_\theta : \mathbb{R}^{H \times W} \rightarrow \mathbb{R}^{n \times d},
-\]
-
-que transforma la imagen de entrada en un conjunto de embeddings
-
-\[
-Z^{cnn} = f_\theta(I) =
-\{z_1, z_2, \dots, z_n\},
-\quad z_i \in \mathbb{R}^d.
-\]
-
-Estos vectores representan descriptores locales de la anatomía de la
-columna vertebral, capturando información de bordes, texturas y patrones
-estructurales presentes en la imagen.
-
-\subsubsection{Estructura geométrica y manifold}
-
-Los embeddings generados por la CNN pueden interpretarse como puntos en
-un espacio euclidiano de dimensión \(d\)
-
-\[
-Z^{cnn} \subset \mathbb{R}^d.
-\]
-
-Bajo la hipótesis de variedad, se asume que estos puntos se encuentran
-aproximadamente sobre una variedad de menor dimensión
-
-\[
-\mathcal{M} \subset \mathbb{R}^d,
-\]
-
-la cual describe la geometría intrínseca de la estructura anatómica
-presente en la imagen.
-
-Esta interpretación permite estudiar la estructura global de los datos
-mediante herramientas geométricas y topológicas.
-
-\subsubsection{Representación topológica mediante complejos simpliciales}
-
-Para capturar relaciones geométricas entre los puntos del embedding se
-construye un complejo simplicial utilizando una filtración de
-Vietoris--Rips.
-
-Sea
-
-\[
-Z = \{z_1,\dots,z_n\}
-\]
-
-el conjunto de embeddings. Para un parámetro de escala
-\(\varepsilon > 0\), el complejo simplicial se define como
-
-\[
-VR_\varepsilon(Z) =
-\{\sigma \subseteq Z :
-d(z_i,z_j) \le \varepsilon
-\ \forall z_i,z_j \in \sigma\}.
-\]
-
-Este complejo permite modelar relaciones de conectividad entre los
-puntos y capturar propiedades topológicas del conjunto de embeddings.
-
-A partir de esta estructura se obtiene un vector de características
-topológicas
-
-\[
-Z^{topo} = \tau(VR_\varepsilon(Z)) \in \mathbb{R}^{d_t},
-\]
-
-donde \(\tau\) representa un operador de resumen topológico.
-
-\subsubsection{Representación mediante kernels}
-
-Con el objetivo de modelar relaciones no lineales entre los embeddings,
-se introduce una función kernel
-
-\[
-k(x_i,x_j) =
-\langle \Phi(x_i), \Phi(x_j) \rangle_{\mathcal{H}},
-\]
-
-donde
+Entre los principales desafíos del dataset se encuentran:
 
 \begin{itemize}
 
-\item \(\Phi(\cdot)\) es una función que proyecta los datos en un
-espacio de características de mayor dimensión
+\item Superposición de estructuras anatómicas en radiografías 2D.
 
-\item \(\mathcal{H}\) es un espacio de Hilbert con producto interno
+\item Variabilidad en la morfología vertebral entre pacientes.
+
+\item Presencia de ruido e inconsistencias en las anotaciones.
+
+\item Diferencias en escala y campo de visión entre estudios.
 
 \end{itemize}
 
-Esta formulación define un espacio de representación no lineal conocido
-como \emph{Reproducing Kernel Hilbert Space} (RKHS).
+Estas características hacen que la segmentación automática de vértebras sea un problema particularmente complejo en radiografías en comparación con modalidades 3D como CT o MRI.
 
-Algunos kernels utilizados comúnmente son
+\subsection{Preprocesamiento}
+%%%%%%%%%%%%
+\subsection{Arquitectura del modelo}
 
-\[
-k_{linear}(x_i,x_j) = x_i^\top x_j
-\]
+Una arquitectura de modelo que se utiliza combina la extracción profunda de características con la descripción geométrica del mundo real y el modelado contextual global. La intención es que el modelo capture los patrones locales (en el sitio de la radiografía) y la geometría global de la columna vertebral. Sea una radiografía de entrada
+\[I \in \mathbb{R}^{H \times W},\]
+donde \(H\) y \(W\) denotan las dimensiones de la imagen. El flujo completo del modelo puede verse como la composición
+\[I\xrightarrow{\phi}Z^{cnn}\xrightarrow{\tau}Z^{topo}\xrightarrow{k}\tilde{Z}\xrightarrow{\mathcal{T}}\hat{Y}.\]
+Todas estas transformaciones registran varios hechos estructurales de los datos.
 
-\[
-k_{RBF}(x_i,x_j) =
-\exp\left(-\frac{\|x_i-x_j\|^2}{2\sigma^2}\right)
-\]
+\subsubsection{Extracción de Características por CNN}
+La red neuronal convolucional para extraer características espaciales de la radiografía se realiza primero. Para el propósito de características formalizadas, la CNN define una función
+\[f_\theta : \mathbb{R}^{H \times W} \rightarrow \mathbb{R}^{n \times d},\]
+para transformar la imagen de entrada en un conjunto de incrustaciones
+\[Z^{cnn} = f_\theta(I) =\{z_1, z_2, \dots, z_n\},\quad z_i \in \mathbb{R}^d.\]
+Estos son descriptores locales de la anatomía de la columna vertebral (por ejemplo, bordes, texturas y patrones estructurales presentes en la imagen).
 
-\[
-k_{poly}(x_i,x_j) =
-(x_i^\top x_j + c)^p.
-\]
+\subsubsection{Estructura de Variedad y Geometría}
+Las incrustaciones producidas por la CNN representan puntos en un espacio euclidiano de dimensión \(d\).
+\[Z^{cnn} \subset \mathbb{R}^d.\]
+Según la hipótesis de variedad, se asume que estos puntos están aproximadamente en una variedad de menor dimensión
+\[\mathcal{M} \subset \mathbb{R}^d,\]
+la geometría intrínseca de la estructura anatómica en la imagen. Esta interpretación permite explorar la estructura global de los datos mediante métodos geométricos y topológicos.
 
-El kernel induce una matriz de similitud
+\subsubsection{Complejos Simpliciales como Representación Topológica}
+Para representar las relaciones geométricas de los puntos de incrustación se forma un complejo simplicial utilizando la filtración de Vietoris--Rips.
+\[Z = \{z_1,\dots,z_n\}\]
+sea el conjunto de incrustaciones. Para un parámetro de escala \(\varepsilon > 0\), el complejo simplicial se define como
+\[VR_\varepsilon(Z) =\{\sigma \subseteq Z :d(z_i,z_j) \le \varepsilon\ \forall z_i,z_j \in \sigma\}.\]
+Este complejo permite modelar la relación de conectividad entre los puntos y se utilizan propiedades topológicas para codificar el conjunto de incrustaciones. De esta estructura, se deriva un vector de características topológicas.
+\[Z^{topo} = \tau(VR_\varepsilon(Z)) \in \mathbb{R}^{d_t},\]
+donde \(\tau\) representa un operador de resumen topológico.
 
-\[
-K_{ij} = k(z_i,z_j),
-\]
+\subsubsection{Representación mediante Núcleo}
+Para modelar relaciones no lineales entre las incrustaciones desarrollamos una función de núcleo.
+\[k(x_i,x_j) =\langle \Phi(x_i), \Phi(x_j) \rangle_{\mathcal{H}},\]
+donde
+\begin{itemize}\item \(\Phi(\cdot)\) es una función que proyecta los datos en un espacio de características de mayor dimensionalidad.\item \(\mathcal{H}\) es un espacio de Hilbert con un producto interno.\end{itemize}
+Esta formulación define un espacio de representación no lineal conocido como el \emph{Espacio de Hilbert de Núcleo Reproductor} (RKHS). Algunos núcleos comúnmente utilizados son
+\[k_{linear}(x_i,x_j) = x_i^\top x_j\]
+\[k_{RBF}(x_i,x_j) =\exp\left(-\frac{\|x_i-x_j\|^2}{2\sigma^2}\right)\]
+\[k_{poly}(x_i,x_j) =(x_i^\top x_j + c)^p.\]
+El núcleo induce una matriz de similitud
+\[K_{ij} = k(z_i,z_j),\]
+que modela las relaciones estructurales entre las incrustaciones.
 
-que captura relaciones estructurales entre los embeddings.
+\subsubsection{Modelado Contextual Usando Transformer}
+Las incrustaciones enriquecidas se introducen en un codificador Transformer que captura relaciones entre diferentes tokens en un sentido global. Sea
+\[\tilde{Z} = \{\tilde{z}_1,\dots,\tilde{z}_n\}\]
+el conjunto ordenado de tokens enriquecidos. Su mecanismo de autoatención se identifica como
+\[\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.\]
 
-\subsubsection{Modelado contextual mediante Transformer}
+El modelo completo puede expresarse en forma compacta como
+\[\hat{Y}=\mathcal{T}\left(k\left(\tau\left(f_\theta(I)\right)\right)\right).\]
+Esta formulación resume el flujo del modelo del sistema; la CNN produce características locales, los Complejos Simpliciales modelan la estructura geométrica de las incrustaciones, los núcleos enriquecen las representaciones basadas en relaciones, y luego un Transformer captura relaciones globales entre tokens.
 
-Los embeddings enriquecidos se procesan mediante un encoder Transformer
-que modela relaciones globales entre los diferentes tokens.
+\begin{figure}[t]\centering\includegraphics[width=0.95\linewidth]{imagenes/model_architecture.png}\caption{Un esquema general del modelo propuesto. La entrada de la radiografía se procesa a través de una red convolucional para obtener mapas de características. Posteriormente, se integran representaciones topológicas y geométricas obtenidas utilizando las incrustaciones. Finalmente, un Transformer con núcleos estima la estructura de la columna vertebral y métricas clínicas, incluyendo el ángulo de Cobb, modelando las relaciones globales entre tokens.}\label{fig:model_architecture}\end{figure}
 
-Sea
 
-\[
-\tilde{Z} = \{\tilde{z}_1,\dots,\tilde{z}_n\}
-\]
+\subsection{Infraestructura Experimental}
 
-la secuencia de tokens enriquecidos. El mecanismo de auto-atención se
-define como
+Con el fin de ejecutar múltiples configuraciones de entrenamiento de manera escalable, se propone una infraestructura experimental orientada a eventos y basada en procesamiento asíncrono. La arquitectura contempla un orquestador central que distribuye experimentos mediante una política \emph{round robin}, un conjunto de \emph{workers} que ejecutan los entrenamientos en paralelo, un controlador de \emph{early stopping} y un sistema de mensajería para desacoplar la ejecución del registro de métricas y artefactos.
 
-\[
-\mathrm{Attention}(Q,K,V)
-=
-\mathrm{softmax}
-\left(
-\frac{QK^\top}{\sqrt{d_k}}
-\right)V.
-\]
+La motivación de esta arquitectura es separar claramente tres responsabilidades: (i) la planificación y asignación de experimentos, (ii) la ejecución paralela de los modelos y (iii) la persistencia y análisis de resultados. De esta forma, los procesos de entrenamiento no bloquean los componentes de monitoreo, y los resultados pueden almacenarse simultáneamente en sistemas de seguimiento de experimentos y en tablas analíticas en la nube.
 
-Este mecanismo permite que cada token interactúe con todos los demás
-tokens, capturando dependencias globales dentro de la estructura de la
-columna vertebral.
+\subsubsection{Arquitectura General}
 
-\subsubsection{Formulación global del pipeline}
+El sistema parte de una cola de configuraciones de experimentos. Un \emph{scheduler} central recibe estas configuraciones y las asigna de forma circular a los \emph{workers} disponibles. Cada \emph{worker} ejecuta un entrenamiento independiente y, al finalizar cada época, publica eventos con métricas parciales, estado de ejecución y artefactos generados. Dichos eventos son enviados a un sistema de mensajería (\emph{Pub/Sub} en GCP o \emph{SNS/SQS} en AWS), desde donde distintos consumidores actualizan MLflow y las tablas analíticas.
 
-De manera compacta, el modelo completo puede expresarse como
-
-\[
-\hat{Y}
-=
-\mathcal{T}
-\left(
-k
-\left(
-\tau
-\left(
-f_\theta(I)
-\right)
-\right)
-\right).
-\]
-
-Esta formulación resume el flujo del modelo: primero se extraen
-características locales mediante una CNN, posteriormente se modela la
-estructura geométrica de los embeddings mediante complejos simpliciales,
-se enriquecen las relaciones entre representaciones mediante kernels y
-finalmente un Transformer captura dependencias globales entre tokens.
-
-\begin{figure}[t]
+\begin{figure}[!t]
 \centering
-\includegraphics[width=0.9\linewidth]{imagenes/model_architecture.png}
-\caption{
-Arquitectura general del modelo propuesto. La radiografía de entrada se
-procesa mediante una red convolucional que extrae embeddings espaciales.
-Estos embeddings se interpretan como puntos en un espacio métrico que
-aproximan una variedad geométrica. Sobre este conjunto se construyen
-complejos simpliciales para capturar relaciones topológicas entre los
-puntos. Posteriormente se aplican funciones kernel para enriquecer el
-espacio de representación y finalmente un encoder Transformer modela
-las relaciones globales entre tokens para capturar la estructura
-completa de la columna vertebral.
+\resizebox{0.98\columnwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=6mm and 7mm,
+  every node/.style={
+    draw,
+    rounded corners,
+    align=center,
+    minimum height=7mm,
+    minimum width=16mm
+  }
+]
+
+\node (queue) {Cola de\\experimentos};
+\node (scheduler) [right=of queue] {Scheduler\\Round Robin};
+\node (workers) [right=of scheduler] {Workers\\paralelos};
+\node (bus) [right=of workers] {Bus de\\eventos};
+\node (mlflow) [above right=of bus] {MLflow};
+\node (bq) [below right=of bus] {BigQuery /\\Tablas analíticas};
+\node (stop) [below=of workers] {Controlador\\Early Stopping};
+
+\draw[-{Latex[length=2mm]}] (queue) -- (scheduler);
+\draw[-{Latex[length=2mm]}] (scheduler) -- (workers);
+\draw[-{Latex[length=2mm]}] (workers) -- (bus);
+\draw[-{Latex[length=2mm]}] (bus) -- (mlflow);
+\draw[-{Latex[length=2mm]}] (bus) -- (bq);
+\draw[-{Latex[length=2mm]}] (workers) -- (stop);
+\draw[-{Latex[length=2mm]}] (stop) -- (workers);
+
+\end{tikzpicture}%
 }
-\label{fig:model_architecture}
+\caption{Arquitectura general para la ejecución distribuida de experimentos.}
+\label{fig:infra_general}
 \end{figure}
+
+\subsubsection{Política Round Robin y Paralelismo}
+
+La distribución de tareas se realiza mediante una política \emph{round robin}, en la cual el planificador recorre cíclicamente la lista de \emph{workers} activos y asigna el siguiente experimento al primer recurso disponible. Esta política permite balancear la carga de forma sencilla y mantener una ocupación uniforme del sistema.
+
+En la implementación propuesta, la lógica de coordinación se mantiene asíncrona y no bloqueante, mientras que la ejecución de entrenamiento se delega a procesos paralelos, dado que el entrenamiento de modelos de aprendizaje profundo es intensivo en CPU/GPU y no se beneficia directamente de un modelo de concurrencia basado únicamente en corrutinas.
+
+\begin{figure}[!t]
+\centering
+\resizebox{0.95\columnwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=5mm and 5mm,
+  every node/.style={
+    draw,
+    rounded corners,
+    align=center,
+    minimum height=7mm,
+    minimum width=12mm
+  }
+]
+
+\node (exp1) {Exp 1};
+\node (exp2) [below=of exp1] {Exp 2};
+\node (exp3) [below=of exp2] {Exp 3};
+\node (exp4) [below=of exp3] {Exp 4};
+
+\node (sched) [right=12mm of exp2] {Scheduler\\RR};
+
+\node (w1) [right=14mm of sched, yshift=10mm] {Worker 1};
+\node (w2) [right=14mm of sched] {Worker 2};
+\node (w3) [right=14mm of sched, yshift=-10mm] {Worker 3};
+
+\draw[-{Latex[length=2mm]}] (exp1.east) -- (sched.west);
+\draw[-{Latex[length=2mm]}] (exp2.east) -- (sched.west);
+\draw[-{Latex[length=2mm]}] (exp3.east) -- (sched.west);
+\draw[-{Latex[length=2mm]}] (exp4.east) -- (sched.west);
+
+\draw[-{Latex[length=2mm]}] (sched.east) -- (w1.west);
+\draw[-{Latex[length=2mm]}] (sched.east) -- (w2.west);
+\draw[-{Latex[length=2mm]}] (sched.east) -- (w3.west);
+
+\end{tikzpicture}%
+}
+\caption{Asignación de experimentos a \emph{workers} mediante política round robin.}
+\label{fig:round_robin}
+\end{figure}
+
+\subsubsection{Early Stopping Basado en Eventos}
+
+Cada \emph{worker} reporta métricas parciales al finalizar una época, tales como pérdida de validación, Dice, precisión o F1-score. Estas métricas son consumidas por un controlador de \emph{early stopping}, el cual evalúa si un experimento debe continuar o detenerse anticipadamente. Este esquema evita desperdiciar recursos computacionales en configuraciones que ya no muestran mejora significativa.
+
+El controlador no interfiere directamente con la lógica interna de entrenamiento, sino que opera como un servicio externo que observa eventos y emite decisiones de control. Esto permite mantener desacoplados el proceso de entrenamiento y la política de parada.
+
+\begin{figure}[!t]
+\centering
+\resizebox{0.95\columnwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=7mm and 8mm,
+  every node/.style={
+    draw,
+    rounded corners,
+    align=center,
+    minimum height=7mm,
+    minimum width=18mm
+  }
+]
+
+\node (worker) {Worker};
+\node (metric) [right=of worker] {Evento:\\métrica por época};
+\node (controller) [right=of metric] {Controlador\\Early Stopping};
+\node (decision) [right=of controller] {Continuar /\\Detener};
+
+\draw[-{Latex[length=2mm]}] (worker) -- (metric);
+\draw[-{Latex[length=2mm]}] (metric) -- (controller);
+\draw[-{Latex[length=2mm]}] (controller) -- (decision);
+
+\end{tikzpicture}%
+}
+\caption{Esquema de control para \emph{early stopping} basado en eventos.}
+\label{fig:early_stopping}
+\end{figure}
+
+\subsubsection{Persistencia de Métricas y Trazabilidad}
+
+Los eventos generados por los \emph{workers} se envían a un bus de mensajería para permitir un esquema de \emph{fan-out}. Desde este bus, un consumidor actualiza MLflow con parámetros, métricas y artefactos del experimento, mientras que otro consumidor escribe registros estructurados en tablas analíticas en la nube. Estas tablas pueden implementarse en BigQuery dentro de GCP o en servicios equivalentes en AWS.
+
+Esta separación permite que el seguimiento de experimentos, la visualización de resultados y el análisis posterior se realicen sin bloquear la ejecución principal. Además, facilita la reproducibilidad y auditoría de los experimentos.
+
+\begin{figure}[!t]
+\centering
+\resizebox{0.98\columnwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=7mm and 10mm,
+  every node/.style={
+    draw,
+    rounded corners,
+    align=center,
+    minimum height=7mm,
+    minimum width=16mm
+  }
+]
+
+\node (worker) {Workers};
+\node (eventbus) [right=of worker] {Pub/Sub\\o SNS/SQS};
+\node (consumer1) [above right=of eventbus] {Consumidor\\MLflow};
+\node (consumer2) [below right=of eventbus] {Consumidor\\Analítica};
+\node (mlflow) [right=of consumer1] {MLflow};
+\node (bq) [right=of consumer2] {BigQuery /\\Tablas nube};
+
+\draw[-{Latex[length=2mm]}] (worker) -- (eventbus);
+\draw[-{Latex[length=2mm]}] (eventbus) -- (consumer1);
+\draw[-{Latex[length=2mm]}] (eventbus) -- (consumer2);
+\draw[-{Latex[length=2mm]}] (consumer1) -- (mlflow);
+\draw[-{Latex[length=2mm]}] (consumer2) -- (bq);
+
+\end{tikzpicture}%
+}
+\caption{Persistencia desacoplada de métricas, artefactos y tablas analíticas.}
+\label{fig:fanout_metrics}
+\end{figure}
+
+\subsubsection{Implementación Propuesta}
+
+La implementación se desarrollará en Python, empleando librerías para concurrencia asíncrona, paralelismo de procesos, mensajería y seguimiento de experimentos. A nivel general, la API de control puede construirse con FastAPI; la orquestación asíncrona con \texttt{asyncio}; la ejecución paralela con \texttt{multiprocessing}, \texttt{ProcessPoolExecutor} o marcos distribuidos como Ray; el seguimiento de experimentos con MLflow; y la mensajería con clientes de Pub/Sub (GCP) o SNS/SQS (AWS).
+
+Este diseño permite que el sistema sea modular, escalable y portable entre proveedores de nube, manteniendo desacopladas la ejecución de los entrenamientos, la política de parada anticipada y el almacenamiento analítico de los resultados.
+
+
+El desarrollo del proyecto se divide en las siguientes fases:\\
+
+1. Preparación del dataset y preprocesamiento de radiografías.\\
+2. Implementación del modelo base basado en CNN.\\
+3. Integración de representaciones topológicas (TDA).\\
+4. Implementación del Transformer multi-kernel.\\
+5. Ejecución de experimentos y análisis de resultados.\\
+
+\section{Diseño Experimental}
+
+Los experimentos se diseñan con el objetivo de evaluar la contribución
+de cada componente del modelo propuesto.
+
+En particular se consideran los siguientes escenarios experimentales:
+
+\begin{itemize}
+
+\item \textbf{Baseline CNN}: modelo basado únicamente en una red
+convolucional para segmentación.
+
+\item \textbf{CNN + Transformer}: incorporación de atención global
+mediante Transformer estándar.
+
+\item \textbf{CNN + TDA + Transformer}: modelo completo con
+representaciones topológicas y kernels múltiples.
+
+\end{itemize}
+
+Adicionalmente se realizarán estudios de ablación para analizar
+el impacto de:
+
+\begin{itemize}
+
+\item distintos kernels en las cabezas de atención,
+\item la inclusión de descriptores topológicos,
+\item la incorporación de la hipótesis de variedad en el espacio de embeddings.
+\end{itemize}
+
+\subsection{Recursos computacionales}
+
+Los experimentos se ejecutarán utilizando infraestructura en la nube con soporte para GPU. La arquitectura propuesta permite distribuir el entrenamiento en múltiples workers para evaluar distintas configuraciones de hiperparámetros de manera paralela.
+
+La implementación se desarrollará en Python utilizando bibliotecas de aprendizaje profundo y herramientas de seguimiento de experimentos como MLflow.
+
+El cronograma contempla las siguientes fases:
+
+\begin{itemize}
+
+\item Implementación inicial del modelo base.
+\item Integración de representaciones topológicas.
+\item Ejecución de experimentos y análisis de resultados.
+\item Evaluación final y redacción del informe.
+\end{itemize}
 
 \subsection{Entrenamiento}
 \subsection{Métricas de Evaluación}
 
 \section{Resultados}
+
+Los resultados del modelo se evaluarán utilizando el conjunto de prueba del dataset. Se analizará el desempeño en la segmentación de vértebras individuales y en la estimación de la curva espinal.
+
+Se compararán distintas configuraciones del modelo, incluyendo variantes del Transformer con diferentes kernels y representaciones topológicas.
 \section{Análisis}
+
+El análisis se centrará en evaluar la contribución de cada componente del modelo. En particular se realizará un estudio de ablación para analizar el impacto de:
+
+\begin{itemize}
+
+\item La inclusión de descriptores topológicos.
+
+\item El uso de kernels distintos en las cabezas de atención del Transformer.
+
+\item La incorporación de estructura geométrica mediante la hipótesis de variedad.
+
+\end{itemize}
 \section{Discusión}
+
+La integración de representaciones topológicas y geométricas dentro de arquitecturas profundas representa una dirección prometedora para mejorar la coherencia anatómica en segmentación médica. Se espera que el uso de descriptores estructurales permita capturar relaciones globales entre vértebras que no son fácilmente modeladas por redes convolucionales tradicionales.
 \section{Conclusiones}
 \section{Trabajo Futuro}
 
+Como trabajo futuro se plantea extender el modelo a datasets clínicos más grandes, explorar representaciones topológicas más avanzadas y evaluar el modelo en escenarios clínicos reales.
+
+También se investigará la incorporación de modelos generativos y aprendizaje auto-supervisado para mejorar la generalización en entornos con datos limitados.
+\nocite{*}
 \bibliographystyle{IEEEtran}
-\bibliography{refs}
+\bibliography{referencias}
+
 
 \end{document}
