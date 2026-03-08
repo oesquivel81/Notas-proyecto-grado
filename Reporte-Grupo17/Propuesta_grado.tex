@@ -1,0 +1,141 @@
+\documentclass[11pt,a4paper]{article}
+
+% -----------------------------
+% PAQUETES
+% -----------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{eso-pic}
+\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{setspace}
+\usepackage{ragged2e}
+
+% -----------------------------
+% MÁRGENES
+% -----------------------------
+\geometry{
+    a4paper,
+    left=2.3cm,
+    right=2.3cm,
+    top=6.0cm,
+    bottom=3.0cm
+}
+
+\setstretch{1.08}
+\setlength{\parindent}{0pt}
+
+% -----------------------------
+% RUTAS DE IMÁGENES
+% -----------------------------
+\newcommand{\HeaderImg}{imagenes/Header.jpg}
+\newcommand{\FooterImg}{imagenes/footer.jpg}
+
+% -----------------------------
+% MEDIDAS DEL FORMATO
+% -----------------------------
+\newcommand{\BannerWidth}{\paperwidth}
+\newcommand{\BannerTopOffset}{4.5cm}
+\newcommand{\FooterWidth}{\dimexpr\paperwidth-1.8cm\relax}
+
+% -----------------------------
+% HEADER Y FOOTER COMO FONDO
+% -----------------------------
+\AddToShipoutPictureBG{%
+    % Header superior
+    \AtPageUpperLeft{%
+        \raisebox{-\BannerTopOffset}{%
+            \includegraphics[width=\paperwidth]{\HeaderImg}%
+        }%
+    }%
+
+    % Footer inferior
+    \AtPageLowerLeft{%
+        \hspace*{0.9cm}%
+        \raisebox{0.55cm}{%
+            \includegraphics[width=\FooterWidth]{\FooterImg}%
+        }%
+    }%
+}
+
+\pagestyle{empty}
+
+% -----------------------------
+% COMANDO PARA TÍTULO TIPO FORMATO
+% -----------------------------
+\newcommand{\FormatoTitulo}[1]{%
+    \begin{center}
+        \vspace*{-0.4cm}
+        {\fontsize{22}{24}\selectfont #1\par}
+        \vspace{0.25cm}
+        {\color[rgb]{0.35,0.23,0.95}\rule{8.2cm}{1.4pt}}
+    \end{center}
+    \vspace{1.2cm}
+}
+
+\begin{document}
+
+\FormatoTitulo{Propuesta de proyecto de grado}
+
+\begin{enumerate}[leftmargin=0.8cm,label=\arabic*.,itemsep=1.0em]
+
+    \item \textbf{Título del Proyecto.}
+
+    \textit{Nombre claro y conciso que refleje el objetivo principal del proyecto.}
+
+    \item \textbf{Organización/Grupo de investigación.}
+
+    \textit{En el cual se enmarca el proyecto, indicando sector o área de trabajo, breve descripción de su actividad, y expertos que respaldarán el trabajo, con sus cargos.}
+
+    \item \textbf{Contexto, problema y Justificación. Impacto esperado.}
+
+    \textit{a. Descripción detallada de la situación actual. Incluye el contexto, descripción del proceso(s) que se va a analizar, con los elementos clave para la caracterización del problema.}
+
+    \textit{b. Descripción detallada del problema que se quiere abordar y su relevancia dentro del contexto.}
+
+    \textit{c. Impacto esperado. Explicar los beneficios esperados del proyecto. Posibles aplicaciones o implicaciones del resultado obtenido.}
+
+    \item \textbf{Objetivos}
+
+    \textbf{Objetivo General.} \textit{Descripción clara y concisa del propósito del proyecto.}
+
+    \textbf{Objetivos Específicos.} \textit{Listado de objetivos que se desean alcanzar durante el desarrollo del proyecto.}
+
+    \item \textbf{Estado del arte.}
+
+    \textit{Revisión del estado del arte. ¿Qué se ha intentado previamente? ¿Cuáles son los avances y limitaciones actuales? Debe incluir al menos tres referencias actuales de trabajos relacionados.}
+
+    \item \textbf{Metodología y solución propuesta.}
+
+    \textit{Describa el enfoque metodológico, la solución planteada, las técnicas, modelos, herramientas o tecnologías a utilizar y la razón de su elección.}
+
+    \item \textbf{Exploración y descripción de los datos.}
+
+    \textit{Caracterización de las fuentes de datos, volumen, estructura, calidad, posibles sesgos, limitaciones, y estrategia de preparación o construcción del conjunto de datos.}
+
+    \item \textbf{Consideraciones éticas.}
+
+    \textit{Discusión sobre privacidad, sesgos, impacto social, uso responsable y estrategias de mitigación.}
+
+    \item \textbf{Evaluación y métricas.}
+
+    \textit{Definición de criterios, métricas, línea base y forma en que se validará la propuesta.}
+
+    \item \textbf{Cronograma.}
+
+    \textit{Plan de trabajo tentativo con actividades y tiempos estimados.}
+
+    \item \textbf{Bibliografía.}
+
+    \textit{Referencias preliminares en el formato indicado por el programa o la facultad.}
+
+\end{enumerate}
+
+\end{document}
