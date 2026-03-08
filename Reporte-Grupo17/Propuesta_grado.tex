@@ -197,8 +197,13 @@
     \begin{itemize}[leftmargin=0.6cm]
         \item \textbf{Privacidad:} trabajo con datos anonimizados y sin información personal identificable.
         \item \textbf{Sesgos:} evaluación de desempeño estratificada por subgrupos disponibles y revisión de errores sistemáticos.
-        \item \textbf{Impacto social:} la herramienta se plantea como apoyo a decisión clínica, no como sustituto del criterio médico.
-        \item \textbf{Transparencia y trazabilidad:} registro de experimentos, configuración de modelos y métricas para auditoría técnica.
+        \item \textbf{Impacto social:} Si bien la automatización de la segmentación vertebral y el cálculo del ángulo de Cobb busca mejorar la eficiencia clínica, existe una preocupación legítima sobre el desplazamiento laboral de especialistas en radiología y ortopedia. La adopción masiva de estos sistemas podría reducir la demanda de intervención humana en tareas de diagnóstico rutinario, afectando la estabilidad económica de ciertos sectores médicos. No obstante, el enfoque del modelo propuesto es actuar como una herramienta de soporte a la decisión clínica y no como un sustituto, permitiendo que el médico se enfoque en la interpretación compleja y el tratamiento personalizado, mitigando así la pérdida del factor humano y la empatía en la relación médico-paciente. 
+        \item \textbf{Transparencia y trazabilidad:} Dada la naturaleza de "caja negra" de las redes neuronales profundas, la arquitectura propuesta incorpora Análisis Topológico de Datos (TDA) y 
+geometría diferencial para aportar una capa de interpretabilidad estructural.
+            \begin{itemize}
+                \item En lugar de ofrecer un resultado opaco, el sistema permite visualizar la línea central estimada y los puntos anatómicos utilizados para el cálculo del ángulo de Cobb.
+                \itemEsta transparencia es vital para que el personal médico pueda auditar la decisión del modelo y comunicar los resultados de manera comprensible y fundamentada a los pacientes.
+            \end{itemize}
     \end{itemize}
 
     \item \textbf{Evaluación y métricas.}
