@@ -19,25 +19,36 @@
 \usepackage{ragged2e}
 \usepackage{amsmath}
 \usepackage{amssymb}
-% -----------------------------
-% MÁRGENES
-% -----------------------------
-\geometry{
-    a4paper,
-    left=2.3cm,
-    right=2.3cm,
-    top=6.0cm,
-    bottom=3.0cm
-}
-
-\setstretch{1.08}
-\setlength{\parindent}{0pt}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usepackage{needspace}
+\usetikzlibrary{positioning,arrows.meta}
 
 % -----------------------------
 % RUTAS DE IMÁGENES
 % -----------------------------
 \newcommand{\HeaderImg}{imagenes/Header.jpg}
 \newcommand{\FooterImg}{imagenes/footer.jpg}
+
+% -----------------------------
+% MÁRGENES (adaptativos si no están las imágenes)
+% -----------------------------
+\newlength{\TopMarginLen}
+\newlength{\BottomMarginLen}
+\IfFileExists{\HeaderImg}{\setlength{\TopMarginLen}{6.0cm}}{\setlength{\TopMarginLen}{4.3cm}}
+\IfFileExists{\FooterImg}{\setlength{\BottomMarginLen}{3.0cm}}{\setlength{\BottomMarginLen}{2.5cm}}
+
+\geometry{
+    a4paper,
+    left=2.3cm,
+    right=2.3cm,
+    top=\TopMarginLen,
+    bottom=\BottomMarginLen
+}
+
+\setstretch{1.06}
+\setlength{\parindent}{0pt}
 
 % -----------------------------
 % MEDIDAS DEL FORMATO
@@ -50,26 +61,27 @@
 % HEADER Y FOOTER COMO FONDO
 % -----------------------------
 \AddToShipoutPictureBG{%
-    % Header superior
-    \AtPageUpperLeft{%
-        \raisebox{-\BannerTopOffset}{%
-            \includegraphics[width=\paperwidth]{\HeaderImg}%
+    \IfFileExists{\HeaderImg}{%
+        \AtPageUpperLeft{%
+            \raisebox{-\BannerTopOffset}{%
+                \includegraphics[width=\paperwidth]{\HeaderImg}%
+            }%
         }%
-    }%
-
-    % Footer inferior
-    \AtPageLowerLeft{%
-        \hspace*{0.9cm}%
-        \raisebox{0.55cm}{%
-            \includegraphics[width=\FooterWidth]{\FooterImg}%
+    }{}%
+    \IfFileExists{\FooterImg}{%
+        \AtPageLowerLeft{%
+            \hspace*{0.9cm}%
+            \raisebox{0.55cm}{%
+                \includegraphics[width=\FooterWidth]{\FooterImg}%
+            }%
         }%
-    }%
+    }{}%
 }
 
 \pagestyle{empty}
 
 % -----------------------------
-% COMANDO PARA TÍTULO TIPO FORMATO
+% COMANDOS DE ESTILO
 % -----------------------------
 \newcommand{\FormatoTitulo}[1]{%
     \begin{center}
@@ -78,14 +90,16 @@
         \vspace{0.25cm}
         {\color[rgb]{0.35,0.23,0.95}\rule{8.2cm}{1.4pt}}
     \end{center}
-    \vspace{1.2cm}
+    \vspace{0.8cm}
 }
+
+\newcommand{\Subtitulo}[1]{\vspace{0.15cm}\textbf{#1}}
 
 \begin{document}
 
 \FormatoTitulo{Propuesta de proyecto de grado}
 
-\begin{enumerate}[leftmargin=0.8cm,label=\arabic*.,itemsep=1.0em]
+\begin{enumerate}[leftmargin=0.8cm,label=\arabic*.,itemsep=0.85em]
 
     \item \textbf{Título del Proyecto.}
 
@@ -93,15 +107,15 @@
 
     \item \textbf{Organización/Grupo de investigación.}
 
-    El proyecto se enmarca en la \textbf{Maestría en Inteligencia Artificial (MAIA)} de la \textbf{Universidad de los Andes}, en el área de visión por computador aplicada a imágenes médicas.
+    El proyecto se desarrolla en la \textbf{Maestría en Inteligencia Artificial (MAIA)} de la \textbf{Universidad de los Andes} y se articula con el \textbf{Grupo de Ingeniería Biomédica de la Universidad de los Andes}, en el área de visión por computador aplicada a imágenes médicas. El equipo de trabajo está conformado por Jason Rosher Morrill, John Williams Morrill, David Alan Delgado Zarco y Octavio Esquivel Álvarez del Castillo.
 
-    Este trabajo aborda un problema de salud digital: análisis automático de radiografías de columna para apoyar la evaluación de escoliosis. El grupo de trabajo está conformado por Jason Rosher Morrill, John Williams Morrill, David Alan Delgado Zarco y Octavio Esquivel Álvarez del Castillo, con acompañamiento académico de docentes e investigadores del programa MAIA en modelado de aprendizaje profundo, analítica de datos y evaluación experimental.
+    El trabajo contará con respaldo académico de \textbf{Luis Felipe Giraldo, Profesor Asociado}, y \textbf{Christian Javier Cifuentes, Profesor Asociado}, quienes aportan experiencia en analítica biomédica, aprendizaje automático y validación experimental en aplicaciones clínicas. Esta articulación entre MAIA e IBIO garantiza acceso a conocimiento de dominio, criterios de evaluación técnicamente pertinentes y acompañamiento metodológico para la investigación.
 
-    \item \textbf{Contexto, problema y Justificación. Impacto esperado.}
+    \item \textbf{Contexto, problema y justificación. Impacto esperado.}
 
-    \textbf{a) Situación actual y contexto.} La escoliosis es una deformidad tridimensional de la columna vertebral cuyo seguimiento clínico se realiza principalmente con radiografías anteroposteriores. En práctica médica, la severidad se cuantifica con el ángulo de Cobb, que requiere identificar manualmente vértebras límite y trazar líneas sobre placas terminales.
+    \Subtitulo{a) Situación actual y contexto.} La escoliosis es una deformidad tridimensional de la columna vertebral cuyo seguimiento clínico se realiza principalmente mediante radiografías anteroposteriores. En la práctica médica, la severidad se cuantifica con el ángulo de Cobb, para cuyo cálculo es necesario identificar vértebras límite y trazar líneas sobre placas terminales. Este flujo es dependiente del observador, consume tiempo clínico y puede introducir variabilidad entre especialistas.
 
-    \textbf{b) Problema a abordar.} El proceso manual introduce variabilidad interobservador y limita la reproducibilidad de las mediciones. Además, la segmentación automática en radiografías 2D es difícil por superposición de estructuras, variabilidad morfológica vertebral, diferencias de escala/campo de visión y ruido en anotaciones. Muchos enfoques actuales aprenden rasgos locales pero no incorporan explícitamente estructura topológica y geométrica de la columna.
+    \Subtitulo{b) Problema a abordar.} La segmentación automática en radiografías 2D es especialmente desafiante por la superposición de estructuras, la variabilidad morfológica entre pacientes, las diferencias de escala y campo de visión, la posible presencia de columna incompleta y el ruido en las anotaciones. Aunque existen modelos potentes basados en CNN y Transformers, muchos de ellos priorizan patrones locales o relaciones contextuales globales sin incorporar de manera explícita restricciones topológicas y geométricas propias de la anatomía vertebral. Esta brecha es especialmente relevante cuando se busca consistencia anatómica vértebra a vértebra y robustez frente a imágenes de calidad heterogénea.
 
     Formalmente, dada una radiografía \(I:\Omega\rightarrow\mathbb{R}\), con \(\Omega\subset\mathbb{R}^2\), se busca estimar:
     \[
@@ -112,40 +126,76 @@
     \theta^*=\arg\min_{\theta}\,\mathbb{E}_{(I,Y)\sim D}\left[\mathcal{L}(f_{\theta}(I),Y)\right].
     \]
 
-    \textbf{c) Justificación e impacto esperado.} Se propone un modelo híbrido (CNN + TDA + Transformer multi-kernel) para mejorar la coherencia anatómica de la segmentación vértebra a vértebra y facilitar la estimación automática del ángulo de Cobb. Se espera reducir variabilidad de medición, aumentar reproducibilidad y habilitar herramientas de apoyo clínico y de tamizaje en contextos con recursos computacionales limitados.
+    \Subtitulo{c) Justificación e impacto esperado.} Se propone un modelo híbrido \textbf{CNN + TDA + Transformer multi-kernel} para mejorar la coherencia anatómica de la segmentación y facilitar la estimación automática del ángulo de Cobb. El impacto esperado incluye: i) reducción de la variabilidad en la medición radiológica; ii) aumento de la reproducibilidad en el seguimiento clínico; iii) disminución del tiempo de análisis manual; y iv) habilitación futura de herramientas portables o desplegables en entornos con restricciones de cómputo, manteniendo al sistema como soporte a la decisión clínica y no como sustituto del especialista.
 
-    \item \textbf{Objetivos}
+    \item \textbf{Objetivos.}
 
-    \textbf{Objetivo General.} Desarrollar un modelo híbrido basado en CNN, análisis topológico de datos y Transformers kernelizados para la segmentación automática de vértebras y la estimación del ángulo de Cobb en radiografías de columna vertebral.
+    \textbf{Objetivo general.} Desarrollar y evaluar un modelo híbrido basado en CNN, análisis topológico de datos y Transformers kernelizados para la segmentación automática de vértebras y la estimación del ángulo de Cobb en radiografías de columna vertebral.
 
-    \textbf{Objetivos Específicos.}
-    \begin{itemize}[leftmargin=0.6cm]
-        \item Diseñar una arquitectura que combine representaciones convolucionales, topológicas y geométricas.
-        \item Implementar un Transformer multi-kernel capaz de integrar múltiples espacios de representación.
-        \item Evaluar el desempeño del modelo en segmentación vertebral con métricas estándar de segmentación médica.
-        \item Analizar el impacto de descriptores topológicos en la coherencia anatómica de la segmentación.
+    \textbf{Objetivos específicos.}
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.25em]
+        \item Diseñar e implementar tres configuraciones comparables bajo un mismo protocolo experimental: \textbf{Baseline CNN}, \textbf{CNN + Transformer} y \textbf{CNN + TDA + Transformer multi-kernel}.
+        \item Cuantificar el desempeño de segmentación mediante métricas de solapamiento como \textbf{IoU o Dice Score}, tanto para la columna vertebral como para la segmentación de cada vértebra.
+        \item Evaluar la utilidad clínica del sistema mediante el error en la estimación del ángulo de Cobb respecto a la referencia disponible.
+        \item Medir la eficiencia computacional del modelo en términos de tiempo y memoria de inferencia, con énfasis en su viabilidad futura para escenarios de recursos limitados.
+        \item Determinar el aporte incremental de los descriptores topológicos, del componente geométrico y de la atención multi-kernel mediante estudios de ablación y comparación con la línea base.
     \end{itemize}
 
     \item \textbf{Estado del arte.}
 
-    En segmentación médica, arquitecturas tipo U-Net y variantes como nnU-Net han establecido líneas base sólidas. Para columna y vértebras, trabajos recientes incorporan Transformers para capturar dependencias globales y mejorar consistencia anatómica, especialmente en CT con campo de visión variable.
+    En segmentación médica, arquitecturas como \textit{U-Net} y variantes auto-configurables como \textit{nnU-Net} constituyen líneas base sólidas para tareas densas de segmentación. En el dominio de columna y vértebras, trabajos recientes han incorporado Transformers para capturar dependencias anatómicas de largo alcance y mejorar la consistencia estructural, especialmente en CT y en escenarios con campo de visión arbitrario.
 
-    Se identifican dos líneas principales: (i) enfoques tipo DETR con \textit{query tokens} para etiquetado/segmentación vertebral, y (ii) integración de ViT/Swin en esquemas encoder-decoder tipo U-Net para segmentación densa. También existen propuestas con señales auxiliares (bordes, centroides) para reforzar separación entre vértebras.
+    Se identifican tres líneas principales de literatura relevante: \textit{(i)} arquitecturas encoder-decoder enriquecidas con atención global (por ejemplo, ViT/Swin integrados a U-Net), \textit{(ii)} enfoques tipo DETR o \textit{vertebra-aware transformers} para etiquetado/segmentación de vértebras, y \textit{(iii)} métodos de preservación topológica mediante pérdidas o restricciones inspiradas en homología persistente. Esta última línea es especialmente importante, porque aporta una base teórica para preservar conectividad, continuidad y coherencia estructural en segmentación.
 
-    La limitación común es que la geometría y topología explícita suelen estar subrepresentadas: se usan centroides, bordes o codificación posicional, pero rara vez descriptores formales de homología persistente, números de Betti, curvatura o geodésicas dentro del embedding y de la atención. Esta brecha es más evidente en radiografías 2D, donde además se recurre con frecuencia a postprocesamientos heurísticos.
-
-    El proyecto aborda ese vacío mediante tokens vertebrales enriquecidos con descriptores topológicos y geométricos, y atención multi-kernel informada por estructura anatómica.
+    La brecha identificada es que la topología y la geometría explícita suelen estar subrepresentadas en la mayoría de soluciones para imágenes médicas de columna. Se utilizan centroides, bordes o codificación posicional, pero rara vez se integran de forma conjunta descriptores de homología persistente, relaciones geodésicas o atención multi-kernel informada por estructura anatómica. Esta limitación es más notoria en radiografías 2D, donde la proyección, la oclusión y la calidad de adquisición dificultan la separación consistente entre vértebras. El proyecto propone cerrar esta brecha combinando representaciones convolucionales locales, descriptores topológicos y atención kernelizada sobre espacios estructurados.
 
     \item \textbf{Metodología y solución propuesta.}
 
-    Se propone un pipeline con cinco etapas:
-    \begin{itemize}[leftmargin=0.6cm]
+    Se propone un pipeline con cinco etapas complementarias:
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.25em]
         \item \textbf{Extracción local (CNN):} obtención de \textit{feature maps} y embeddings anatómicos a partir de la radiografía.
-        \item \textbf{Enriquecimiento topológico (TDA):} construcción de complejos simpliciales (Vietoris-Rips) y extracción de descriptores topológicos vectorizados.
-        \item \textbf{Componente geométrico (manifold):} incorporación de estructura geométrica intrínseca sobre el espacio de embeddings.
-        \item \textbf{Transformer multi-kernel:} cada cabeza de atención opera con kernels distintos (p. ej., lineal, RBF, coseno/polinomial) según el espacio de representación (CNN, topológico, manifold).
-        \item \textbf{Decodificación densa:} generación de máscara multiclase vértebra a vértebra y cálculo de métricas derivadas (como ángulo de Cobb).
+        \item \textbf{Enriquecimiento topológico (TDA):} construcción de complejos simpliciales (por ejemplo, Vietoris-Rips) y extracción/vectorización de descriptores topológicos relevantes.
+        \item \textbf{Componente geométrico (manifold):} incorporación de estructura geométrica intrínseca sobre el espacio de embeddings para modelar continuidad anatómica.
+        \item \textbf{Transformer multi-kernel:} cada cabeza de atención opera con kernels distintos (lineal, RBF, coseno o polinomial) según el espacio de representación y el tipo de relación que se desea enfatizar.
+        \item \textbf{Decodificación densa:} generación de máscara multiclase vértebra a vértebra y cálculo de métricas derivadas, incluyendo ángulo de Cobb.
     \end{itemize}
+
+    \Needspace{12\baselineskip}
+    \textbf{Diagrama funcional de la solución propuesta:}
+
+    \begingroup
+\shorthandoff{<>}
+\begin{center}
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=8mm,
+  every node/.style={
+    draw, rectangle, rounded corners,
+    minimum width=18mm, minimum height=7mm,
+    align=center, inner sep=3pt
+  },
+  >=Latex
+]
+\node (input) {Imagen\\$x:\Omega\to\mathbb{R}$};
+\node (cnn) [right=of input] {CNN\\$F_{\text{CNN}}$};
+\node (E) [right=of cnn] {Feature Maps\\$\mathcal{E}=\{f:\Omega\to\mathbb{R}^d\}$};
+\node (top) [right=of E] {Topología +\\Geometría\\$F_{\text{Top}}$};
+\node (Z) [right=of top] {Representación\\Enriquecida\\$\mathcal{Z}=\mathcal{E}\times\mathcal{T}\times\mathcal{M}$};
+\node (trans) [right=of Z] {Transformer\\Multi-kernel\\$F_{\text{Trans}}^{\{k_h\}}$};
+\node (H) [right=of trans] {Campo\\Contextual\\$\mathcal{H}=\{h:\Omega\to\mathbb{R}^{d_h}\}$};
+\node (out) [right=of H] {Segmentación\\$\mathcal{Y}=\{y:\Omega\to\{0,\dots,C-1\}\}$};
+
+\draw[->] (input) -- (cnn);
+\draw[->] (cnn) -- (E);
+\draw[->] (E) -- (top);
+\draw[->] (top) -- (Z);
+\draw[->] (Z) -- (trans);
+\draw[->] (trans) -- (H);
+\draw[->] (H) -- (out);
+\end{tikzpicture}%
+}
+\end{center}
+\endgroup
 
     Flujo funcional resumido del modelo:
     \[
@@ -166,102 +216,102 @@
     \]
     Como kernels candidatos se consideran, entre otros:
     \[
-    k_{linear}(x_i,x_j)=x_i^\top x_j,\quad
+    k_{linear}(x_i,x_j)=x_i^\top x_j,\qquad
     k_{RBF}(x_i,x_j)=\exp\left(-\frac{\|x_i-x_j\|^2}{2\sigma^2}\right),
     \]
     \[
     k_{poly}(x_i,x_j)=(x_i^\top x_j + c)^p.
     \]
 
-    Para entrenamiento y experimentación, se utilizará una infraestructura escalable con planificador \textit{round robin}, ejecución paralela de \textit{workers}, \textit{early stopping} basado en eventos y trazabilidad en MLflow.
+    \textbf{Herramientas y plataforma experimental.} La implementación se realizará en Python, empleando librerías de aprendizaje profundo y seguimiento experimental. Para trazabilidad y comparación de corridas se utilizará \textit{MLflow}; para orquestación de procesos asíncronos y paralelos se contempla \textit{asyncio}, \textit{ProcessPoolExecutor} o \textit{Ray}; y para desacoplamiento por eventos se consideran esquemas tipo \textit{Pub/Sub} o \textit{SNS/SQS}. La experimentación se ejecutará sobre infraestructura con soporte GPU.
+
+    \textbf{Fases metodológicas.} El proyecto se organizará en cinco fases: i) preparación y perfilamiento de datos; ii) implementación del baseline CNN; iii) incorporación de TDA y componente geométrico; iv) integración del Transformer multi-kernel; y v) evaluación comparativa, ablaciones y análisis final.
 
     \item \textbf{Exploración y descripción de los datos.}
 
-    El dataset contiene radiografías anteroposteriores de columna de pacientes con y sin escoliosis, con diferentes niveles de anotación:
-    \begin{itemize}[leftmargin=0.6cm]
-        \item Radiografía original en escala de grises.
-        \item Máscara binaria de columna.
-        \item Segmentación multiclase por vértebra (etiquetas independientes).
-        \item Curva espinal estimada a partir de la segmentación.
-        \item Métricas clínicas asociadas (incluyendo ángulo de Cobb).
-    \end{itemize}
+    El conjunto de datos es provisto en el marco del \textbf{Grupo de Ingeniería Biomédica de la Universidad de los Andes}. Se dispone de \textbf{250 radiografías} anonimizadas de columna correspondientes a \textbf{199 pacientes únicos}, con dos grandes grupos clínicos: \textbf{179 estudios con escoliosis} y \textbf{71 estudios normales}. Su uso está restringido a fines académicos e investigativos y requiere acuerdo de confidencialidad, dado que las anotaciones son propias del grupo.
 
-    \textbf{Limitaciones y sesgos potenciales:} variabilidad en resolución/contraste, superposición de estructuras anatómicas en 2D, diferencias de morfología vertebral entre pacientes, y posibles inconsistencias en anotaciones.
+    \begin{center}
+    \small
+    \begin{tabularx}{0.96\linewidth}{>{\raggedright\arraybackslash}p{4.2cm}X}
+    \hline
+    \textbf{Característica} & \textbf{Descripción} \\
+    \hline
+    Unidad de observación & Radiografía AP de columna; existen pacientes con más de un estudio. \\
+    Anotaciones disponibles & Máscara binaria de columna, segmentación multiclase por vértebra, visualización en escala de grises/color y archivo de métricas clínicas derivadas. \\
+    Sensibilidad y uso & Datos anonimizados, sin identificadores personales directos; uso académico/investigativo restringido. \\
+    Restricción metodológica & La partición experimental debe realizarse por paciente para evitar fuga de información. \\
+    \hline
+    \end{tabularx}
+    \normalsize
+    \end{center}
 
-    \textbf{Estrategia de preparación:} estandarización de formato, control de calidad de etiquetas, partición entrenamiento-validación-prueba, y definición de flujos de preprocesamiento orientados a mejorar robustez ante variaciones de escala y ruido.
+    \textbf{Preprocesamiento propuesto.} Se realizará estandarización de formato, control de calidad de etiquetas, normalización de intensidades, revisión de consistencia entre máscara binaria y segmentación multiclase, y partición entrenamiento-validación-prueba \textbf{estratificada por condición clínica y a nivel de paciente}. Se evaluará el uso de técnicas de remuestreo o pérdidas ponderadas para mitigar el desbalance entre estudios normales y con escoliosis.
 
-    Además de las máscaras, el dataset incluye representaciones derivadas (curva espinal y overlays con métricas clínicas), lo cual permite evaluar consistencia anatómica global y no solo desempeño por píxel.
+    \textbf{Desafíos identificados.} Los principales retos son: i) heterogeneidad en resolución y contraste; ii) superposición de estructuras anatómicas en 2D; iii) diferencias morfológicas entre pacientes y grados de deformidad; iv) presencia de múltiples estudios por paciente; y v) disponibilidad no homogénea de métricas clínicas derivadas, ya que estas aparecen principalmente en los casos con escoliosis. Estos factores justifican un protocolo cuidadoso de partición, validación y análisis de sesgos.
 
     \item \textbf{Consideraciones éticas.}
 
-    El proyecto considera el uso responsable de datos médicos y la mitigación de riesgos de sesgo algorítmico:
-    \begin{itemize}[leftmargin=0.6cm]
-    \item \textbf{Privacidad:} El manejo de imágenes médicas (X-ray) conlleva una alta sensibilidad ética. Para garantizar la integridad de la información y cumplir con las normativas internacionales de protección de datos:
-    \begin{itemize}
-        \item Anonimización: Se aplicarán protocolos estrictos para eliminar metadatos de identificación personal (DICOM headers) antes del entrenamiento.
-        \item Seguridad: El procesamiento en la nube y el bus de mensajería (Pub/Sub, SQS) contarán con cifrado de extremo a extremo, asegurando que los datos de los pacientes no sean expuestos ni utilizados para fines ajenos a la investigación clínica y el diagnóstico.
+    El proyecto contempla los principios de privacidad, equidad, transparencia y uso responsable en contexto médico:
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.2em]
+        \item \textbf{Privacidad y seguridad.} Las radiografías están anonimizadas y su uso se limita al entorno académico/investigativo. La gestión de artefactos y experimentos se realizará sobre infraestructura controlada, con acceso restringido a los datos y trazabilidad de las ejecuciones.
+        \item \textbf{Sesgos y representatividad.} Existe desbalance entre estudios normales y estudios con escoliosis, así como variabilidad potencial en calidad de imagen y severidad de la deformidad. Para mitigar este riesgo se evaluarán pérdidas ponderadas, monitoreo por subgrupos y análisis desagregado del desempeño.
+        \item \textbf{Transparencia.} El sistema se concibe como soporte a la decisión clínica. Se priorizará la visualización de la segmentación, de la línea central estimada y de los elementos anatómicos utilizados en el cálculo del ángulo de Cobb para facilitar auditoría técnica por parte del especialista.
+        \item \textbf{Impacto social.} La propuesta no busca sustituir al profesional de salud, sino reducir carga operativa, apoyar el seguimiento y ampliar acceso a herramientas de análisis en contextos con menor disponibilidad de especialistas.
     \end{itemize}
-
-    \item \textbf{Sesgos:} Un desafío crítico en el desarrollo de este modelo es el desequilibrio de clases en el dataset, donde la prevalencia de radiografías de columnas sanas sobre casos con escoliosis severa puede inducir un sesgo de "normalidad".
-    \begin{itemize}
-        \item Sesgo: El modelo podría presentar una tendencia a clasificar erróneamente la mayoría de los casos como "sin escoliosis", al considerar la estructura estándar como el estado por defecto del sistema.
-        \item Mitigación: Para garantizar la equidad en los resultados, se abandonará el enfoque de aumento de datos artificial y, en su lugar, se implementarán funciones de pérdida ponderadas (weighted loss functions). Esta estrategia consiste en asignar un mayor peso a los errores cometidos en las clases minoritarias (casos con escoliosis) durante el entrenamiento, obligando al modelo a prestar mayor atención a las características morfológicas de la deformidad espinal y equilibrando así la importancia estadística de cada clase.
-    \end{itemize}
-
-    \item \textbf{Impacto social:} Si bien la automatización de la segmentación vertebral y el cálculo del ángulo de Cobb busca mejorar la eficiencia clínica, existe una preocupación legítima sobre el desplazamiento laboral de especialistas en radiología y ortopedia. La adopción masiva de estos sistemas podría reducir la demanda de intervención humana en tareas de diagnóstico rutinario, afectando la estabilidad económica de ciertos sectores médicos. No obstante, el enfoque del modelo propuesto es actuar como una herramienta de soporte a la decisión clínica y no como un sustituto, permitiendo que el médico se enfoque en la interpretación compleja y el tratamiento personalizado, mitigando así la pérdida del factor humano y la empatía en la relación médico-paciente. 
-
-    \item \textbf{Transparencia y trazabilidad:} Dada la naturaleza de "caja negra" de las redes neuronales profundas, la arquitectura propuesta incorpora Análisis Topológico de Datos (TDA) y geometría diferencial para aportar una capa de interpretabilidad estructural.
-    \begin{itemize}
-        \item En lugar de ofrecer un resultado opaco, el sistema permite visualizar la línea central estimada y los puntos anatómicos utilizados para el cálculo del ángulo de Cobb.
-        \item Esta transparencia es vital para que el personal médico pueda auditar la decisión del modelo y comunicar los resultados de manera comprensible y fundamentada a los pacientes.
-    \end{itemize}
-\end{itemize}
 
     \item \textbf{Evaluación y métricas.}
 
-    La evaluación se realizará comparando tres configuraciones: \textbf{Baseline CNN}, \textbf{CNN + Transformer}, y \textbf{CNN + TDA + Transformer multi-kernel}.
+    La evaluación se realizará comparando tres configuraciones: \textbf{Baseline CNN}, \textbf{CNN + Transformer} y \textbf{CNN + TDA + Transformer multi-kernel}, todas bajo el mismo protocolo de partición por paciente.
 
-    \textbf{Criterios y métricas principales:}
-    \begin{itemize}[leftmargin=0.6cm]
-        \item Calidad de segmentación por vértebra (p. ej., Dice y métricas complementarias de precisión/F1 según configuración experimental).
-        \item Coherencia anatómica global de la segmentación.
-        \item Error en estimación del ángulo de Cobb respecto a referencia disponible.
-        \item Eficiencia computacional y estabilidad de entrenamiento.
+    \textbf{Métricas de segmentación.}
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.2em]
+        \item \textbf{IoU o Dice Score} para la columna vertebral y para la segmentación de cada vértebra.
     \end{itemize}
 
-    Se incluirán estudios de ablación para cuantificar el aporte de descriptores topológicos, kernels de atención y componente geométrico. El diseño experimental contempla tres escenarios: \textbf{Baseline CNN}, \textbf{CNN + Transformer} y \textbf{CNN + TDA + Transformer multi-kernel}, con validación comparativa bajo el mismo protocolo de partición de datos.
+    \textbf{Métricas clínicas y computacionales.}
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.2em]
+        \item Error en la estimación del ángulo de Cobb frente a la referencia disponible.
+        \item Tiempo y memoria requeridos para la inferencia como indicadores de eficiencia computacional.
+        \item Estabilidad del entrenamiento mediante seguimiento de convergencia y variabilidad entre corridas.
+    \end{itemize}
 
-    Como referencia del mecanismo base de atención contextual, también se considerará la formulación estándar:
+    \textbf{Análisis experimental.} Se incluirán estudios de ablación para cuantificar el aporte de los descriptores topológicos, del componente geométrico y de los kernels de atención. Los resultados se reportarán con estadísticos descriptivos sobre el conjunto de prueba y comparación relativa frente a la línea base. Como referencia del mecanismo base de atención contextual, también se considerará la formulación estándar:
     \[
     \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.
     \]
 
     \item \textbf{Cronograma.}
 
-    Plan tentativo (16 semanas):
-    \begin{itemize}[leftmargin=0.6cm]
-        \item \textbf{Semanas 1--3:} preparación del dataset, control de calidad y preprocesamiento.
-        \item \textbf{Semanas 4--6:} implementación y ajuste del baseline CNN.
-        \item \textbf{Semanas 7--9:} integración de descriptores topológicos (TDA).
-        \item \textbf{Semanas 10--12:} implementación de Transformer multi-kernel y pruebas iniciales.
-        \item \textbf{Semanas 13--14:} experimentos comparativos y ablaciones.
-        \item \textbf{Semanas 15--16:} análisis final de resultados, conclusiones y redacción de informe.
+    En coherencia con el formato del proyecto de grado, se propone un plan de trabajo de \textbf{8 semanas} para el segundo ciclo:
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.2em]
+        \item \textbf{Semana 1:} perfilamiento del dataset, validación de integridad y definición del protocolo de partición por paciente.
+        \item \textbf{Semana 2:} preprocesamiento y construcción del baseline CNN.
+        \item \textbf{Semana 3:} ajuste del baseline y definición del protocolo final de evaluación.
+        \item \textbf{Semana 4:} incorporación de descriptores topológicos y validación intermedia.
+        \item \textbf{Semana 5:} integración del componente geométrico y del Transformer multi-kernel.
+        \item \textbf{Semana 6:} experimentos comparativos entre las tres configuraciones.
+        \item \textbf{Semana 7:} estudios de ablación, análisis de eficiencia computacional y revisión de sesgos.
+        \item \textbf{Semana 8:} consolidación de resultados, conclusiones y redacción final del informe.
     \end{itemize}
 
-    \textbf{Resultados esperados y recursos.} Se espera obtener una mejora medible en segmentación y coherencia anatómica frente a líneas base, junto con estimación automática más estable del ángulo de Cobb. Para ello se usarán recursos de cómputo en nube con soporte GPU, ejecución distribuida por \textit{workers}, mensajería de eventos (Pub/Sub o SNS/SQS) y seguimiento de experimentos con MLflow.
+    \textbf{Viabilidad y recursos.} El plan es viable porque el dataset ya se encuentra identificado y estructurado, existen expertos de dominio que respaldan la evaluación y la infraestructura requerida se limita a recursos de cómputo con GPU, gestión de experimentos y orquestación paralela. El diseño considera como deseable la futura portabilidad a escenarios de recursos limitados, por lo que se medirán explícitamente memoria y tiempo de inferencia desde la etapa experimental.
 
     \item \textbf{Bibliografía.}
 
     Referencias preliminares:
-    \begin{itemize}[leftmargin=0.6cm]
+    \begin{itemize}[leftmargin=0.6cm,itemsep=0.2em]
         \item Ronneberger, O., Fischer, P., \& Brox, T. (2015). \textit{U-Net: Convolutional Networks for Biomedical Image Segmentation}. MICCAI.
-        \item Isensee, F., et al. (2021). \textit{nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation}. Nature Methods.
+        \item Isensee, F., Jaeger, P. F., Kohl, S. A. A., Petersen, J., \& Maier-Hein, K. H. (2021). \textit{nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation}. Nature Methods.
+        \item Vaswani, A., et al. (2017). \textit{Attention Is All You Need}. NeurIPS.
         \item Tao, R., Liu, W., \& Zheng, G. (2022). \textit{Spine-transformers: Vertebra labeling and segmentation in arbitrary field-of-view spine CTs via 3D transformers}. Medical Image Analysis.
         \item Zhang, Y., et al. (2023). \textit{A Spine Segmentation Method under an Arbitrary Field of View Based on 3D Swin Transformer}. International Journal of Intelligent Systems.
         \item Li, X., et al. (2024). \textit{VerFormer: Vertebrae-Aware Transformer for Automatic Spine Segmentation from CT Images}. Diagnostics.
         \item Aydogdu, S., et al. (2024). \textit{Improving Vertebrae Segmentation Using a Centroid Detection-Guided Transformer-Based Network}. IEEE ISBI.
         \item Clough, J. R., et al. (2020). \textit{A Topological Loss Function for Deep-Learning Based Image Segmentation Using Persistent Homology}. IEEE TPAMI.
         \item Hu, X., et al. (2019). \textit{Topology-Preserving Deep Image Segmentation}. NeurIPS.
+        \item Bronstein, M. M., Bruna, J., LeCun, Y., Szlam, A., \& Vandergheynst, P. (2017). \textit{Geometric Deep Learning: Going beyond Euclidean data}. IEEE Signal Processing Magazine.
+        \item Edelsbrunner, H., \& Harer, J. (2010). \textit{Computational Topology: An Introduction}. American Mathematical Society.
     \end{itemize}
 
 \end{enumerate}
