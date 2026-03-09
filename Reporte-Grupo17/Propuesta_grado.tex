@@ -17,7 +17,8 @@
 \usepackage{parskip}
 \usepackage{setspace}
 \usepackage{ragged2e}
-
+\usepackage{amsmath}
+\usepackage{amssymb}
 % -----------------------------
 % MÁRGENES
 % -----------------------------
@@ -195,23 +196,26 @@
 
     El proyecto considera el uso responsable de datos médicos y la mitigación de riesgos de sesgo algorítmico:
     \begin{itemize}[leftmargin=0.6cm]
-        \item \textbf{Privacidad:}El manejo de imágenes médicas (X-ray) conlleva una alta sensibilidad ética. Para garantizar la integridad de la información y cumplir con las normativas internacionales de protección de datos:
-        \begin{itemize}
-            \item Anonimización: Se aplicarán protocolos estrictos para eliminar metadatos de identificación personal (DICOM headers) antes del entrenamiento.
-            \item Seguridad: El procesamiento en la nube y el bus de mensajería (Pub/Sub, SQS) contarán con cifrado de extremo a extremo, asegurando que los datos de los pacientes no sean expuestos ni utilizados para fines ajenos a la investigación clínica y el diagnóstico.
-        \item \textbf{Sesgos:} Un desafío crítico en el desarrollo de este modelo es el desequilibrio de clases en el dataset, donde la prevalencia de radiografías de columnas sanas sobre casos con escoliosis severa puede inducir un sesgo de "normalidad".
-        \begin{itemize}
-            \item Sesgo: El modelo podría presentar una tendencia a clasificar erróneamente la mayoría de los casos como "sin escoliosis", al considerar la estructura estándar como el estado por defecto del sistema.
-            \item Mitigación: Para garantizar la equidad en los resultados, se abandonará el enfoque de aumento de datos artificial y, en su lugar, se implementarán funciones de pérdida ponderadas (weighted loss functions). Esta estrategia consiste en asignar un mayor peso a los errores cometidos en las clases minoritarias (casos con escoliosis) durante el entrenamiento, obligando al modelo a prestar mayor atención a las características morfológicas de la deformidad espinal y equilibrando así la importancia estadística de cada clase.
-
-        \item \textbf{Impacto social:} Si bien la automatización de la segmentación vertebral y el cálculo del ángulo de Cobb busca mejorar la eficiencia clínica, existe una preocupación legítima sobre el desplazamiento laboral de especialistas en radiología y ortopedia. La adopción masiva de estos sistemas podría reducir la demanda de intervención humana en tareas de diagnóstico rutinario, afectando la estabilidad económica de ciertos sectores médicos. No obstante, el enfoque del modelo propuesto es actuar como una herramienta de soporte a la decisión clínica y no como un sustituto, permitiendo que el médico se enfoque en la interpretación compleja y el tratamiento personalizado, mitigando así la pérdida del factor humano y la empatía en la relación médico-paciente. 
-        \item \textbf{Transparencia y trazabilidad:} Dada la naturaleza de "caja negra" de las redes neuronales profundas, la arquitectura propuesta incorpora Análisis Topológico de Datos (TDA) y 
-geometría diferencial para aportar una capa de interpretabilidad estructural.
-            \begin{itemize}
-                \item En lugar de ofrecer un resultado opaco, el sistema permite visualizar la línea central estimada y los puntos anatómicos utilizados para el cálculo del ángulo de Cobb.
-                \item Esta transparencia es vital para que el personal médico pueda auditar la decisión del modelo y comunicar los resultados de manera comprensible y fundamentada a los pacientes.
-            \end{itemize}
+    \item \textbf{Privacidad:} El manejo de imágenes médicas (X-ray) conlleva una alta sensibilidad ética. Para garantizar la integridad de la información y cumplir con las normativas internacionales de protección de datos:
+    \begin{itemize}
+        \item Anonimización: Se aplicarán protocolos estrictos para eliminar metadatos de identificación personal (DICOM headers) antes del entrenamiento.
+        \item Seguridad: El procesamiento en la nube y el bus de mensajería (Pub/Sub, SQS) contarán con cifrado de extremo a extremo, asegurando que los datos de los pacientes no sean expuestos ni utilizados para fines ajenos a la investigación clínica y el diagnóstico.
     \end{itemize}
+
+    \item \textbf{Sesgos:} Un desafío crítico en el desarrollo de este modelo es el desequilibrio de clases en el dataset, donde la prevalencia de radiografías de columnas sanas sobre casos con escoliosis severa puede inducir un sesgo de "normalidad".
+    \begin{itemize}
+        \item Sesgo: El modelo podría presentar una tendencia a clasificar erróneamente la mayoría de los casos como "sin escoliosis", al considerar la estructura estándar como el estado por defecto del sistema.
+        \item Mitigación: Para garantizar la equidad en los resultados, se abandonará el enfoque de aumento de datos artificial y, en su lugar, se implementarán funciones de pérdida ponderadas (weighted loss functions). Esta estrategia consiste en asignar un mayor peso a los errores cometidos en las clases minoritarias (casos con escoliosis) durante el entrenamiento, obligando al modelo a prestar mayor atención a las características morfológicas de la deformidad espinal y equilibrando así la importancia estadística de cada clase.
+    \end{itemize}
+
+    \item \textbf{Impacto social:} Si bien la automatización de la segmentación vertebral y el cálculo del ángulo de Cobb busca mejorar la eficiencia clínica, existe una preocupación legítima sobre el desplazamiento laboral de especialistas en radiología y ortopedia. La adopción masiva de estos sistemas podría reducir la demanda de intervención humana en tareas de diagnóstico rutinario, afectando la estabilidad económica de ciertos sectores médicos. No obstante, el enfoque del modelo propuesto es actuar como una herramienta de soporte a la decisión clínica y no como un sustituto, permitiendo que el médico se enfoque en la interpretación compleja y el tratamiento personalizado, mitigando así la pérdida del factor humano y la empatía en la relación médico-paciente. 
+
+    \item \textbf{Transparencia y trazabilidad:} Dada la naturaleza de "caja negra" de las redes neuronales profundas, la arquitectura propuesta incorpora Análisis Topológico de Datos (TDA) y geometría diferencial para aportar una capa de interpretabilidad estructural.
+    \begin{itemize}
+        \item En lugar de ofrecer un resultado opaco, el sistema permite visualizar la línea central estimada y los puntos anatómicos utilizados para el cálculo del ángulo de Cobb.
+        \item Esta transparencia es vital para que el personal médico pueda auditar la decisión del modelo y comunicar los resultados de manera comprensible y fundamentada a los pacientes.
+    \end{itemize}
+\end{itemize}
 
     \item \textbf{Evaluación y métricas.}
 
