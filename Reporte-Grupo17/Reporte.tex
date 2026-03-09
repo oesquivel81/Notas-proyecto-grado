@@ -617,6 +617,21 @@ Entre los principales desafíos del dataset se encuentran:
 
 Estas características hacen que la segmentación automática de vértebras sea un problema particularmente complejo en radiografías en comparación con modalidades 3D como CT o MRI.
 
+\begin{figure}[H]
+\centering
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{cc}
+\subfloat[Distribución de imágenes por split]{\includegraphics[width=0.45\linewidth]{analysis/figures/split_distribution.png}} &
+\subfloat[Dispersión de resoluciones (ancho vs alto)]{\includegraphics[width=0.45\linewidth]{analysis/figures/resolution_scatter.png}}
+\end{tabular}
+
+\caption{Diagnóstico exploratorio del dataset. Se observa desbalance entre clases (Normal/Scoliosis) y alta variabilidad en resolución, lo cual justifica estrategias de preprocesamiento y partición cuidadosa por paciente.}
+
+\label{fig:eda_dataset_profile}
+
+\end{figure}
+
 \subsection{Preprocesamiento}
 %%%%%%%%%%%%
 \subsection{Arquitectura del modelo}
@@ -911,6 +926,22 @@ El cronograma contempla las siguientes fases:
 Los resultados del modelo se evaluarán utilizando el conjunto de prueba del dataset. Se analizará el desempeño en la segmentación de vértebras individuales y en la estimación de la curva espinal.
 
 Se compararán distintas configuraciones del modelo, incluyendo variantes del Transformer con diferentes kernels y representaciones topológicas.
+
+\begin{figure}[H]
+\centering
+\setlength{\tabcolsep}{3pt}
+
+\begin{tabular}{cc}
+\subfloat[Histograma del ángulo de Cobb]{\includegraphics[width=0.45\linewidth]{analysis/figures/cobb_histogram.png}} &
+\subfloat[Boxplot del ángulo de Cobb]{\includegraphics[width=0.45\linewidth]{analysis/figures/cobb_boxplot.png}}
+\end{tabular}
+
+\caption{Distribución de la severidad clínica en el subconjunto Scoliosis. La concentración de casos en rangos altos de Cobb sugiere un dataset sesgado hacia deformidades severas, aspecto que debe considerarse en la interpretación del desempeño del modelo.}
+
+\label{fig:eda_cobb_distribution}
+
+\end{figure}
+
 \section{Análisis}
 
 El análisis se centrará en evaluar la contribución de cada componente del modelo. En particular se realizará un estudio de ablación para analizar el impacto de:

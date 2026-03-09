@@ -18,6 +18,9 @@
 \usepackage{setspace}
 \usepackage{ragged2e}
 
+% Paquetes matemáticos
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+
 % -----------------------------
 % MÁRGENES
 % -----------------------------
@@ -41,7 +44,6 @@
 % -----------------------------
 % MEDIDAS DEL FORMATO
 % -----------------------------
-\newcommand{\BannerWidth}{\paperwidth}
 \newcommand{\BannerTopOffset}{4.5cm}
 \newcommand{\FooterWidth}{\dimexpr\paperwidth-1.8cm\relax}
 
@@ -55,7 +57,6 @@
             \includegraphics[width=\paperwidth]{\HeaderImg}%
         }%
     }%
-
     % Footer inferior
     \AtPageLowerLeft{%
         \hspace*{0.9cm}%
@@ -68,7 +69,7 @@
 \pagestyle{empty}
 
 % -----------------------------
-% COMANDO PARA TÍTULO TIPO FORMATO
+% COMANDO PARA TÍTULO
 % -----------------------------
 \newcommand{\FormatoTitulo}[1]{%
     \begin{center}
@@ -96,7 +97,7 @@
 
     Este trabajo aborda un problema de salud digital: análisis automático de radiografías de columna para apoyar la evaluación de escoliosis. El grupo de trabajo está conformado por Jason Rosher Morrill, John Williams Morrill, David Alan Delgado Zarco y Octavio Esquivel Álvarez del Castillo, con acompañamiento académico de docentes e investigadores del programa MAIA en modelado de aprendizaje profundo, analítica de datos y evaluación experimental.
 
-    \item \textbf{Contexto, problema y Justificación. Impacto esperado.}
+    \item \textbf{Contexto, problema y justificación. Impacto esperado.}
 
     \textbf{a) Situación actual y contexto.} La escoliosis es una deformidad tridimensional de la columna vertebral cuyo seguimiento clínico se realiza principalmente con radiografías anteroposteriores. En práctica médica, la severidad se cuantifica con el ángulo de Cobb, que requiere identificar manualmente vértebras límite y trazar líneas sobre placas terminales.
 
@@ -113,17 +114,17 @@
 
     \textbf{c) Justificación e impacto esperado.} Se propone un modelo híbrido (CNN + TDA + Transformer multi-kernel) para mejorar la coherencia anatómica de la segmentación vértebra a vértebra y facilitar la estimación automática del ángulo de Cobb. Se espera reducir variabilidad de medición, aumentar reproducibilidad y habilitar herramientas de apoyo clínico y de tamizaje en contextos con recursos computacionales limitados.
 
-    \item \textbf{Objetivos}
+    \item \textbf{Objetivos.}
 
-    \textbf{Objetivo General.} Desarrollar un modelo híbrido basado en CNN, análisis topológico de datos y Transformers kernelizados para la segmentación automática de vértebras y la estimación del ángulo de Cobb en radiografías de columna vertebral.
+    \textbf{Objetivo general.} Desarrollar un modelo híbrido basado en CNN, análisis topológico de datos y Transformers kernelizados para la segmentación automática de vértebras y la estimación del ángulo de Cobb en radiografías de columna vertebral.
 
-    \textbf{Objetivos Específicos.}
-    \begin{itemize}[leftmargin=0.6cm]
-        \item Diseñar una arquitectura que combine representaciones convolucionales, topológicas y geométricas.
-        \item Implementar un Transformer multi-kernel capaz de integrar múltiples espacios de representación.
-        \item Evaluar el desempeño del modelo en segmentación vertebral con métricas estándar de segmentación médica.
-        \item Analizar el impacto de descriptores topológicos en la coherencia anatómica de la segmentación.
-    \end{itemize}
+\textbf{Objetivos específicos.}
+\begin{itemize}[leftmargin=0.6cm]
+    \item Implementar y comparar tres configuraciones experimentales: \textit{Baseline CNN}, \textit{CNN + Transformer} y \textit{CNN + TDA + Transformer multi-kernel}.
+    \item Diseñar una estrategia de representación que combine rasgos convolucionales, descriptores topológicos y estructura geométrica para mejorar la segmentación vértebra a vértebra.
+    \item Cuantificar el aporte de cada componente del modelo mediante estudios de ablación usando métricas de segmentación y error en la estimación del ángulo de Cobb.
+    \item Evaluar la viabilidad computacional del enfoque propuesto en términos de tiempo de entrenamiento, tiempo de inferencia y consumo de recursos en entornos con capacidad limitada.
+\end{itemize}
 
     \item \textbf{Estado del arte.}
 
@@ -150,10 +151,12 @@
     \[
     F = F_{\text{Dec}} \circ F_{\text{Trans}}^{\{k_h\}} \circ F_{\text{Top}} \circ F_{\text{CNN}}.
     \]
+
     Para una imagen de entrada \(I\in\mathbb{R}^{H\times W}\), el flujo de representación se describe como:
     \[
     I\xrightarrow{\phi}Z^{cnn}\xrightarrow{\tau}Z^{topo}\xrightarrow{k}\tilde{Z}\xrightarrow{\mathcal{T}}\hat{Y}.
     \]
+
     En la atención kernelizada por cabeza \(h\), se define:
     \[
     (K_h)_{ij}=k_h(t_i,t_j),\qquad
@@ -163,6 +166,7 @@
     \[
     \mathrm{head}_h(i)=\sum_{j=1}^{n}A_h(i,j)V_h(t_j).
     \]
+
     Como kernels candidatos se consideran, entre otros:
     \[
     k_{linear}(x_i,x_j)=x_i^\top x_j,\quad
@@ -185,32 +189,45 @@
         \item Métricas clínicas asociadas (incluyendo ángulo de Cobb).
     \end{itemize}
 
-    \textbf{Limitaciones y sesgos potenciales:} variabilidad en resolución/contraste, superposición de estructuras anatómicas en 2D, diferencias de morfología vertebral entre pacientes, y posibles inconsistencias en anotaciones.
+    \textbf{Limitaciones y sesgos potenciales:} variabilidad en resolución/contraste, superposición de estructuras anatómicas en 2D, diferencias de morfología vertebral entre pacientes y posibles inconsistencias en anotaciones.
 
-    \textbf{Estrategia de preparación:} estandarización de formato, control de calidad de etiquetas, partición entrenamiento-validación-prueba, y definición de flujos de preprocesamiento orientados a mejorar robustez ante variaciones de escala y ruido.
+    \textbf{Estrategia de preparación:} estandarización de formato, control de calidad de etiquetas, partición entrenamiento-validación-prueba y definición de flujos de preprocesamiento orientados a mejorar robustez ante variaciones de escala y ruido.
 
     Además de las máscaras, el dataset incluye representaciones derivadas (curva espinal y overlays con métricas clínicas), lo cual permite evaluar consistencia anatómica global y no solo desempeño por píxel.
+
+    \begin{center}
+        \includegraphics[width=0.48\linewidth]{analysis/figures/split_distribution.png}
+        \hfill
+        \includegraphics[width=0.48\linewidth]{analysis/figures/resolution_scatter.png}
+    \end{center}
+    \textit{Figura.} Diagnóstico exploratorio del dataset: distribución de muestras por clase y dispersión de resoluciones de las radiografías.
 
     \item \textbf{Consideraciones éticas.}
 
     El proyecto considera el uso responsable de datos médicos y la mitigación de riesgos de sesgo algorítmico:
-    \begin{itemize}[leftmargin=0.6cm]
-        \item \textbf{Privacidad:}El manejo de imágenes médicas (X-ray) conlleva una alta sensibilidad ética. Para garantizar la integridad de la información y cumplir con las normativas internacionales de protección de datos:
-        \begin{itemize}
-            \item Anonimización: Se aplicarán protocolos estrictos para eliminar metadatos de identificación personal (DICOM headers) antes del entrenamiento.
-            \item Seguridad: El procesamiento en la nube y el bus de mensajería (Pub/Sub, SQS) contarán con cifrado de extremo a extremo, asegurando que los datos de los pacientes no sean expuestos ni utilizados para fines ajenos a la investigación clínica y el diagnóstico.
-        \item \textbf{Sesgos:} Un desafío crítico en el desarrollo de este modelo es el desequilibrio de clases en el dataset, donde la prevalencia de radiografías de columnas sanas sobre casos con escoliosis severa puede inducir un sesgo de "normalidad".
-        \begin{itemize}
-            \item Sesgo: El modelo podría presentar una tendencia a clasificar erróneamente la mayoría de los casos como "sin escoliosis", al considerar la estructura estándar como el estado por defecto del sistema.
-            \item Mitigación: Para garantizar la equidad en los resultados, se abandonará el enfoque de aumento de datos artificial y, en su lugar, se implementarán funciones de pérdida ponderadas (weighted loss functions). Esta estrategia consiste en asignar un mayor peso a los errores cometidos en las clases minoritarias (casos con escoliosis) durante el entrenamiento, obligando al modelo a prestar mayor atención a las características morfológicas de la deformidad espinal y equilibrando así la importancia estadística de cada clase.
 
-        \item \textbf{Impacto social:} Si bien la automatización de la segmentación vertebral y el cálculo del ángulo de Cobb busca mejorar la eficiencia clínica, existe una preocupación legítima sobre el desplazamiento laboral de especialistas en radiología y ortopedia. La adopción masiva de estos sistemas podría reducir la demanda de intervención humana en tareas de diagnóstico rutinario, afectando la estabilidad económica de ciertos sectores médicos. No obstante, el enfoque del modelo propuesto es actuar como una herramienta de soporte a la decisión clínica y no como un sustituto, permitiendo que el médico se enfoque en la interpretación compleja y el tratamiento personalizado, mitigando así la pérdida del factor humano y la empatía en la relación médico-paciente. 
-        \item \textbf{Transparencia y trazabilidad:} Dada la naturaleza de "caja negra" de las redes neuronales profundas, la arquitectura propuesta incorpora Análisis Topológico de Datos (TDA) y 
-geometría diferencial para aportar una capa de interpretabilidad estructural.
-            \begin{itemize}
-                \item En lugar de ofrecer un resultado opaco, el sistema permite visualizar la línea central estimada y los puntos anatómicos utilizados para el cálculo del ángulo de Cobb.
-                \item Esta transparencia es vital para que el personal médico pueda auditar la decisión del modelo y comunicar los resultados de manera comprensible y fundamentada a los pacientes.
-            \end{itemize}
+    \begin{itemize}[leftmargin=0.6cm]
+
+        \item \textbf{Privacidad.} El manejo de imágenes médicas (X-ray) conlleva una alta sensibilidad ética. Para garantizar la integridad de la información y cumplir con normativas de protección de datos:
+        \begin{itemize}[leftmargin=0.6cm]
+            \item \textbf{Anonimización:} se aplicarán protocolos estrictos para eliminar metadatos de identificación personal antes del entrenamiento.
+            \item \textbf{Seguridad:} el procesamiento en la nube y el bus de mensajería (Pub/Sub, SQS) contarán con cifrado de extremo a extremo, evitando exposición o uso indebido de los datos.
+        \end{itemize}
+
+        \item \textbf{Sesgos.} Un desafío crítico en el desarrollo del modelo es el desequilibrio de clases en el dataset, donde la prevalencia de radiografías de columnas sanas sobre casos con escoliosis severa puede inducir un sesgo de normalidad.
+        \begin{itemize}[leftmargin=0.6cm]
+            \item \textbf{Sesgo identificado:} el modelo podría tender a clasificar erróneamente la mayoría de los casos como ``sin escoliosis''.
+            \item \textbf{Mitigación:} se emplearán funciones de pérdida ponderadas (\textit{weighted loss functions}) para aumentar la importancia estadística de las clases minoritarias durante el entrenamiento.
+        \end{itemize}
+
+        \item \textbf{Impacto social.} Aunque la automatización de la segmentación vertebral y del cálculo del ángulo de Cobb puede mejorar la eficiencia clínica, existe preocupación legítima sobre el desplazamiento de tareas rutinarias realizadas por especialistas. El enfoque propuesto no busca sustituir al médico, sino funcionar como herramienta de soporte a la decisión clínica.
+
+        \item \textbf{Transparencia y trazabilidad.} Dada la naturaleza de caja negra de muchas redes neuronales profundas, la arquitectura propuesta incorpora análisis topológico de datos y geometría diferencial para aportar interpretabilidad estructural.
+        \begin{itemize}[leftmargin=0.6cm]
+            \item El sistema permitirá visualizar la línea central estimada y los puntos anatómicos usados para el cálculo del ángulo de Cobb.
+            \item Esta transparencia facilitará la auditoría del modelo y la comunicación comprensible de los resultados al personal médico y a los pacientes.
+        \end{itemize}
+
     \end{itemize}
 
     \item \textbf{Evaluación y métricas.}
@@ -219,9 +236,9 @@ geometría diferencial para aportar una capa de interpretabilidad estructural.
 
     \textbf{Criterios y métricas principales:}
     \begin{itemize}[leftmargin=0.6cm]
-        \item Calidad de segmentación por vértebra (p. ej., Dice y métricas complementarias de precisión/F1 según configuración experimental).
+        \item Calidad de segmentación por vértebra (p. ej., Dice y métricas complementarias de precisión/F1 según la configuración experimental).
         \item Coherencia anatómica global de la segmentación.
-        \item Error en estimación del ángulo de Cobb respecto a referencia disponible.
+        \item Error en la estimación del ángulo de Cobb respecto a la referencia disponible.
         \item Eficiencia computacional y estabilidad de entrenamiento.
     \end{itemize}
 
@@ -232,6 +249,13 @@ geometría diferencial para aportar una capa de interpretabilidad estructural.
     \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.
     \]
 
+    \begin{center}
+        \includegraphics[width=0.48\linewidth]{analysis/figures/cobb_histogram.png}
+        \hfill
+        \includegraphics[width=0.48\linewidth]{analysis/figures/cobb_boxplot.png}
+    \end{center}
+    \textit{Figura.} Distribución del ángulo de Cobb en el subconjunto de escoliosis (histograma y boxplot), útil para interpretar sesgo de severidad y estrategia de validación.
+
     \item \textbf{Cronograma.}
 
     Plan tentativo (16 semanas):
@@ -241,10 +265,10 @@ geometría diferencial para aportar una capa de interpretabilidad estructural.
         \item \textbf{Semanas 7--9:} integración de descriptores topológicos (TDA).
         \item \textbf{Semanas 10--12:} implementación de Transformer multi-kernel y pruebas iniciales.
         \item \textbf{Semanas 13--14:} experimentos comparativos y ablaciones.
-        \item \textbf{Semanas 15--16:} análisis final de resultados, conclusiones y redacción de informe.
+        \item \textbf{Semanas 15--16:} análisis final de resultados, conclusiones y redacción del informe.
     \end{itemize}
 
-    \textbf{Resultados esperados y recursos.} Se espera obtener una mejora medible en segmentación y coherencia anatómica frente a líneas base, junto con estimación automática más estable del ángulo de Cobb. Para ello se usarán recursos de cómputo en nube con soporte GPU, ejecución distribuida por \textit{workers}, mensajería de eventos (Pub/Sub o SNS/SQS) y seguimiento de experimentos con MLflow.
+    \textbf{Resultados esperados y recursos.} Se espera obtener una mejora medible en segmentación y coherencia anatómica frente a líneas base, junto con una estimación automática más estable del ángulo de Cobb. Para ello se usarán recursos de cómputo en nube con soporte GPU, ejecución distribuida por \textit{workers}, mensajería de eventos (Pub/Sub o SNS/SQS) y seguimiento de experimentos con MLflow.
 
     \item \textbf{Bibliografía.}
 

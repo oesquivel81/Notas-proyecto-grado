@@ -1,0 +1,27 @@
+{
+  "seed": 42,
+  "ratios": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "patients_total": 199,
+  "rows_total": 250,
+  "patient_counts_by_split": {
+    "train": 139,
+    "val": 30,
+    "test": 30
+  },
+  "row_counts_by_split": {
+    "train": 171,
+    "test": 39,
+    "val": 40
+  },
+  "scoliosis_rate_by_split": {
+    "test": 0.6923076923076923,
+    "train": 0.7309941520467836,
+    "val": 0.675
+  },
+  "leakage_patients_count": 0,
+  "leakage_patients": []
+}

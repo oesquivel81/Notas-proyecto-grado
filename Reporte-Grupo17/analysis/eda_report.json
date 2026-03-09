@@ -1,0 +1,133 @@
+{
+  "dataset_root": "C:\\Users\\Tavo\\Documents\\GitHub\\Notas-proyecto-grado\\Reporte-Grupo17\\MaIA_Scoliosis_Dataset",
+  "dataset_index": {
+    "rows": 250,
+    "columns": [
+      "split",
+      "image",
+      "patient_id",
+      "radiograph_path",
+      "label_binary_path",
+      "multiclass_id_png",
+      "multiclass_gray_jpg",
+      "multiclass_color_jpg",
+      "metrics_json"
+    ]
+  },
+  "folder_file_counts": {
+    "LabelBinaryJPG": 250,
+    "LabelMultiClass_Color_JPG": 250,
+    "LabelMultiClass_Gray_JPG": 250,
+    "LabelMultiClass_ID_PNG": 250,
+    "Normal": 71,
+    "RadiographMetrics": 718,
+    "Scoliosis": 179
+  },
+  "split_distribution": {
+    "Normal": 71,
+    "Scoliosis": 179
+  },
+  "missing_paths_by_column": {
+    "radiograph_path": 0,
+    "label_binary_path": 0,
+    "multiclass_id_png": 0,
+    "multiclass_gray_jpg": 0,
+    "multiclass_color_jpg": 0,
+    "metrics_json": 71
+  },
+  "patient_id_checks": {
+    "unique_patient_ids": 199,
+    "ids_with_more_than_one_image": 51,
+    "max_images_per_patient_id": 2,
+    "ids_appearing_in_multiple_splits": 51,
+    "sample_cross_split_ids": [
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "35",
+      "36",
+      "37",
+      "38",
+      "39",
+      "40"
+    ]
+  },
+  "labels": {
+    "multiclass_label_count": 36,
+    "non_standard_labels_count": 13,
+    "non_standard_labels": {
+      "23": "Entity 10",
+      "24": "Entity 12",
+      "25": "Entity 13",
+      "26": "Entity 14",
+      "27": "Entity 16",
+      "28": "Entity 17",
+      "29": "Entity 18",
+      "30": "Entity 21",
+      "31": "Entity 3",
+      "32": "Entity 6",
+      "33": "Entity 8",
+      "34": "10",
+      "35": "2"
+    }
+  },
+  "radiograph_metrics": {
+    "rows": 179,
+    "columns": [
+      "patient_id",
+      "rx_path",
+      "label_binary_path",
+      "curve_csv",
+      "overlay_png",
+      "overlay_metrics_png",
+      "metrics_json",
+      "cobb_angle_deg"
+    ],
+    "cobb_non_null": 179,
+    "cobb_stats_deg": {
+      "min": 3.104490653904281,
+      "mean": 61.19808392613498,
+      "median": 61.969224073914255,
+      "max": 89.99999999998084,
+      "p25": 45.825448935352256,
+      "p75": 76.71074597666359
+    },
+    "cobb_buckets_deg": {
+      "lt_10": 3,
+      "between_10_25": 4,
+      "between_25_40": 27,
+      "ge_40": 145
+    }
+  },
+  "resolution_analysis": {
+    "readable_images": 250,
+    "unreadable_images": 0,
+    "unique_resolutions": 250,
+    "width": {
+      "min": 123,
+      "mean": 519.58,
+      "max": 2972
+    },
+    "height": {
+      "min": 595,
+      "mean": 1309.616,
+      "max": 4999
+    },
+    "aspect_ratio": {
+      "min": 0.16224814422057265,
+      "mean": 0.3632744576457959,
+      "max": 0.7199211045364892
+    }
+  }
+}
