@@ -123,7 +123,7 @@
     \]
     donde \(Y:\Omega\rightarrow\{0,1,\dots,C-1\}\) representa una máscara multiclase por vértebra. El problema de aprendizaje se plantea como:
     \[
-    \theta^*=\arg\min_{\theta}\,\mathbb{E}_{(I,Y)\sim D}\left[\mathcal{L}(f_{\theta}(I),Y)\right].
+    \theta^{*}=\arg\min_{\theta}\;\mathbb{E}_{(I,Y)\sim\mathcal{D}}\left[\mathcal{L}(f_{\theta}(I),Y)\right].
     \]
 
     \Subtitulo{c) Justificación e impacto esperado.} Se propone un modelo híbrido \textbf{CNN + TDA + Transformer multi-kernel} para mejorar la coherencia anatómica de la segmentación y facilitar la estimación automática del ángulo de Cobb. El impacto esperado incluye: i) reducción de la variabilidad en la medición radiológica; ii) aumento de la reproducibilidad en el seguimiento clínico; iii) disminución del tiempo de análisis manual; y iv) habilitación futura de herramientas portables o desplegables en entornos con restricciones de cómputo, manteniendo al sistema como soporte a la decisión clínica y no como sustituto del especialista.
@@ -238,11 +238,11 @@
         \item Métricas clínicas asociadas (incluyendo ángulo de Cobb).
     \end{itemize}
 
-    \textbf{Fuente y tamaño del dataset.} El conjunto de datos utilizado en este proyecto proviene de [nombre de la institución, repositorio o convenio académico], y está conformado por [N] radiografías anteroposteriores de columna correspondientes a [M] pacientes/estudios. El dataset incluye casos con y sin escoliosis, cubriendo distintos grados de curvatura y variabilidad anatómica. Para fines experimentales, los datos se dividirán en entrenamiento, validación y prueba con una partición de [70\%]-[15\%]-[15\%], asegurando separación por paciente para evitar fuga de información entre subconjuntos.
+    \textbf{Fuente y tamaño del dataset.} El conjunto de datos utilizado en este proyecto se enmarca en el Grupo de Ingeniería Biomédica de la Universidad de los Andes y corresponde a un conjunto de más de 200 radiografías anteroposteriores de columna completa, con anotaciones de máscara de la columna vertebral y de cada vértebra. El dataset incluye casos con y sin escoliosis, cubriendo distintos grados de curvatura y variabilidad anatómica. Todas las imágenes se encuentran anonimizadas, no contienen datos personales identificables y su uso está restringido al desarrollo académico e investigativo. Dado que las anotaciones son propias, su utilización requiere acuerdo de confidencialidad. Para fines experimentales, los datos se dividirán en entrenamiento, validación y prueba, asegurando separación por paciente para evitar fuga de información entre subconjuntos.
 
 \textbf{Criterios de inclusión y exclusión.} Se incluirán estudios radiográficos anteroposteriores con calidad diagnóstica suficiente, presencia visible de la columna torácica y lumbar en el campo de visión, y disponibilidad de anotaciones utilizables para segmentación y/o medición clínica. Se excluirán estudios con artefactos severos, imágenes incompletas, etiquetas inconsistentes o casos en los que no sea posible identificar de manera confiable las vértebras de interés.
 
-\textbf{Anotación y control de calidad.} Las máscaras y referencias clínicas fueron generadas por [especialistas / equipo anotador / protocolo institucional]. Como parte del control de calidad, se realizará una revisión de consistencia de etiquetas, detección de vértebras incompletas, corrección de clases ambiguas y validación visual de overlays para asegurar coherencia anatómica entre imagen y segmentación.
+\textbf{Anotación y control de calidad.} Las máscaras y referencias clínicas corresponden a anotaciones propias asociadas al conjunto de datos utilizado en el proyecto. Como parte del control de calidad, se realizará una revisión de consistencia de etiquetas, detección de vértebras incompletas, corrección de clases ambiguas y validación visual de overlays para asegurar coherencia anatómica entre imagen y segmentación. Adicionalmente, se verificará la integridad de los estudios y la separación por paciente antes de la partición experimental, con el fin de reducir riesgo de fuga de información y sesgos de validación.
 
     \textbf{Limitaciones y sesgos potenciales:} variabilidad en resolución/contraste, superposición de estructuras anatómicas en 2D, diferencias de morfología vertebral entre pacientes y posibles inconsistencias en anotaciones.
 
@@ -280,14 +280,17 @@
     \textbf{Criterios y métricas principales:}
     \begin{itemize}[leftmargin=0.6cm]
         \item Calidad de segmentación por vértebra (p. ej., Dice y métricas complementarias de precisión/F1 según la configuración experimental).
-        \item Coherencia anatómica global de la segmentación.
+        \item Coherencia anatómica global de la segmentación, apoyada en la revisión de continuidad estructural de la columna y en las representaciones derivadas disponibles, como curva espinal y overlays con métricas clínicas.
         \item Error en la estimación del ángulo de Cobb respecto a la referencia disponible.
         \item Eficiencia computacional y estabilidad de entrenamiento.
     \end{itemize}
 
     Se incluirán estudios de ablación para cuantificar el aporte de descriptores topológicos, kernels de atención y componente geométrico. El diseño experimental contempla tres escenarios: \textbf{Baseline CNN}, \textbf{CNN + Transformer} y \textbf{CNN + TDA + Transformer multi-kernel}, con validación comparativa bajo el mismo protocolo de partición de datos.
 
+
     Como referencia del mecanismo base de atención contextual, también se considerará la formulación estándar:
+    
+    \vspace{1em}
     \[
     \mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.
     \]
@@ -295,7 +298,7 @@
     \begin{center}
         \includegraphics[width=0.48\linewidth]{analysis/figures/cobb_histogram.png}
         \hfill
-        \includegraphics[width=0.48\linewidth]{analysis/figures/cobb_boxplot.png}
+        \includegraphics[width=0.38\linewidth]{analysis/figures/cobb_boxplot.png}
     \end{center}
     \textit{Figura.} Distribución del ángulo de Cobb en el subconjunto de escoliosis (histograma y boxplot), útil para interpretar sesgo de severidad y estrategia de validación.
 
@@ -318,6 +321,7 @@
 
     \textbf{Viabilidad y recursos.} El plan es viable porque el dataset ya se encuentra identificado y estructurado, existen expertos de dominio que respaldan la evaluación y la infraestructura requerida se limita a recursos de cómputo con GPU, gestión de experimentos y orquestación paralela. El diseño considera como deseable la futura portabilidad a escenarios de recursos limitados, por lo que se medirán explícitamente memoria y tiempo de inferencia desde la etapa experimental.
 
+	\newpage    
     \item \textbf{Bibliografía.}
 
     Referencias preliminares:
